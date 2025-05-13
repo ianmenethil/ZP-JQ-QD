@@ -61,3 +61,6 @@ repomix.config.json
 public_/
 gulpfile.html.watch.js
 build/
+demopage.html
+ZenPay_Tester_x.html
+standalone.html

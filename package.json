@@ -2,7 +2,7 @@
     "name": "zenpay-payment-plugin",
     "version": "1.0.0",
     "description": "ZenPay Payment Plugin Demo with modular JavaScript",
-    "main": "build/js/bundle.js",
+    "main": "build/index.html",
     "author": "Ian Menethil",
     "license": "MIT",
     "homepage": "https://zenithpayments.support",
@@ -23,12 +23,12 @@
         "build:assets:dev": "webpack --config webpack.config.dev.js --mode=development && npm run clean:post",
         "build:assets:prod": "webpack --config webpack.config.prod.js --mode=production && npm run clean:post",
         "build:html": "gulp --gulpfile gulpfile.js",
+        "copy:public": "copyfiles -u 1 src/public/**/* build",
         "dev": "npm run clean:pre && npm run build:assets:dev && npm run build:html && npm run clean:post",
-        "build": "npm run clean:pre && npm run build:assets:prod && npm run build:html && npm run clean:post",
+        "build": "npm run clean:pre && npm run build:assets:prod && npm run build:html && npm run copy:public && npm run clean:post",
         "lint": "eslint . --fix",
         "pretty": "prettier --write .",
-        "format:build": "prettier --write build --ignore-path NUL",
-        "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+        "format:build": "prettier --write build --ignore-path NUL"
     },
     "dependencies": {
         "autoprefixer": "^10.4.21",
@@ -40,10 +40,11 @@
         "mini-css-extract-plugin": "^2.9.2",
         "postcss-loader": "^8.1.1",
         "postcss-preset-env": "^10.1.6",
-        "rimraf": "^6.0.1",
         "webpack": "^5.99.8"
     },
     "devDependencies": {
+        "copyfiles": "^2.4.1",
+        "rimraf": "^6.0.1",
         "webpack-cli": "^6.0.1"
     }
 }

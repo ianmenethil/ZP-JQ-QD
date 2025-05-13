@@ -10,9 +10,8 @@ import { initUrlBuilder } from './urlBuilder.js';
 import { initExtendedOptions } from './extendedOptions.js';
 import { initPlaceholder, setupPlaceholderStyling } from './placeholders.js';
 import { restoreSessionValues } from './session.js';
-// import { setupSessionListeners } from './initListeners.js';
 import { updateCodePreview, updateMinHeightBasedOnMode } from './codePreview.js';
-import './appLogger.js';
+import './applogger.js';
 import {
 	initCredentialsListeners,
 	initPaymentMethodToggleListeners,
@@ -29,7 +28,7 @@ import {
 	initOverrideFeePayerToggle,
 	initUrlBuilderListeners,
 	initEmailConfirmationListeners,
-	updateActionButtonsState, // Import this function to use after session restoration
+	updateActionButtonsState // Import this function to use after session restoration
 } from './initListeners.js';
 import { generateAndSetUuids } from './helpers.js';
 import { initFileInputListener } from './fileInput.js';
