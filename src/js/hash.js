@@ -201,13 +201,14 @@ export async function createSHA1Hash(apiKey, username, password, mode, paymentAm
 	console.info(`[createSHA1Hash] SHA1 👉 ${hash}`);
 	// Debugging output:
 	const debugInput = [apiKey, username, password, mode, paymentAmount, merchantUniquePaymentId].join('|');
+    const debugHash = await sha1Hash(debugInput);
 	console.info('');
 	console.info('');
 	console.warn(`[createSHA1Hash] DEBUG:▶️`);
 	console.warn(`[createSHA1Hash] 👇 Input without timestamp 👇`);
 	console.warn({ debugInput });
 	console.warn(`[createSHA1Hash] 👇 Output 👇`);
-	console.warn({ hash });
+	console.warn({ debugHash });
 	console.warn(`[createSHA1Hash] DEBUG:🔚`);
 	console.info('');
 	console.info('');
