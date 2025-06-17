@@ -242,3 +242,45 @@ export const extendedOptionsTab = {
 	minHeight: DEFAULT_VALUES.options.minHeight,
 };
 export const extendedOptions = extendedOptionsTab;
+
+// ============================================================================
+// V3 COMPATIBILITY MODE
+// ============================================================================
+
+/**
+ * V3 compatibility mode for testing older API versions
+ * @type {Object}
+ */
+window.zpV3CompatMode = {
+	omitTimestampFromHash: false,
+	omitMerchantCodeFromPayload: false
+};
+
+/**
+ * Help function to display available debug commands
+ */
+window.zenhelp = function() {
+	console.log('%c🔧 ZenPay Debug Commands', 'color: #4CAF50; font-size: 16px; font-weight: bold');
+	console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #666');
+	console.log('');
+	console.log('%c📌 V3 Compatibility Mode:', 'color: #2196F3; font-weight: bold');
+	console.log('  zpV3CompatMode.omitTimestampFromHash = true/false');
+	console.log('    → Excludes timestamp from fingerprint hash calculation');
+	console.log('  zpV3CompatMode.omitMerchantCodeFromPayload = true/false');
+	console.log('    → Excludes merchantCode from plugin initialization payload');
+	console.log('');
+	console.log('%c📋 Current Settings:', 'color: #FF9800; font-weight: bold');
+	console.log('  Timestamp excluded:', window.zpV3CompatMode.omitTimestampFromHash);
+	console.log('  MerchantCode excluded:', window.zpV3CompatMode.omitMerchantCodeFromPayload);
+	console.log('');
+	console.log('%c💡 Example Usage:', 'color: #9C27B0; font-weight: bold');
+	console.log('  // Test v3 without timestamp');
+	console.log('  zpV3CompatMode.omitTimestampFromHash = true');
+	console.log('  // Then click "Initialize Plugin" button');
+	console.log('');
+	console.log('%c🔄 Reset All:', 'color: #F44336; font-weight: bold');
+	console.log('  zpV3CompatMode.omitTimestampFromHash = false');
+	console.log('  zpV3CompatMode.omitMerchantCodeFromPayload = false');
+	console.log('');
+	console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #666');
+};

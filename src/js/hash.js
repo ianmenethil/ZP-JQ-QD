@@ -69,13 +69,6 @@ function validateFingerprintPayload(apiKey, username, password, mode, paymentAmo
 }
 
 export function buildFingerprintPayload(apiKey, username, password, mode, paymentAmount, merchantUniquePaymentId, timestamp) {
-	console.log(`[buildFingerprintPayload] apiKey: ${apiKey}`);
-	console.log(`[buildFingerprintPayload] username: ${username}`);
-	console.log(`[buildFingerprintPayload] password: ${password}`);
-	console.log(`[buildFingerprintPayload] mode: ${mode}`);
-	console.log(`[buildFingerprintPayload] paymentAmount: ${paymentAmount}`);
-	console.log(`[buildFingerprintPayload] merchantUniquePaymentId: ${merchantUniquePaymentId}`);
-	console.log(`[buildFingerprintPayload] timestamp: ${timestamp}`);
 	if (!validateFingerprintPayload(apiKey, username, password, mode, paymentAmount, merchantUniquePaymentId, timestamp)) {
 		throw new Error('[buildFingerprintPayload] Invalid fingerprint payload');
 	}
@@ -88,12 +81,6 @@ export function buildFingerprintPayload(apiKey, username, password, mode, paymen
 		merchantUniquePaymentId,
 		timestamp
 	};
-	console.log(`[buildFingerprintPayload] Payload:`);
-	console.log(payload);
-	console.log('{payload}');
-	console.json(payload);
-	console.log('{json-payload}');
-	console.log(`[buildFingerprintPayload] Payload: ${JSON.stringify(payload)}`);
 	return payload;
 }
 
@@ -128,7 +115,7 @@ export async function generateFingerprint({ apiKey, username, password, mode, pa
 	if (_password === DummyPassword) _password = '';
 
 	if (!_apiKey || !_username || !_password || !mode || !paymentAmount || !merchantUniquePaymentId || !timestamp) {
-		console.warn('[generateFingerprint] Missing required values for fingerprint generation');
+		// console.warn('[generateFingerprint] Missing required values for fingerprint generation');
 		return '';
 	}
 	const selectedVersion = $('input[name="version"]:checked').val();
@@ -186,7 +173,13 @@ async function sha1Hash(...inputs) {
  * @returns {Promise<string>} Promise resolving to the SHA-1 fingerprint hash.
  */
 export async function createSHA1Hash(apiKey, username, password, mode, paymentAmount, merchantUniquePaymentId, timestamp) {
-	const data = [apiKey, username, password, mode, paymentAmount, merchantUniquePaymentId, timestamp].join('|');
+	// Build data array based on compatibility mode
+	const dataArray = [apiKey, username, password, mode, paymentAmount, merchantUniquePaymentId];
+	if (!window.zpV3CompatMode?.omitTimestampFromHash) {
+		dataArray.push(timestamp);
+	}
+	
+	const data = dataArray.join('|');
 	console.log(`[createSHA1Hash] Fingerprint Payload 👇`);
 	console.json({
 		apiKey,
@@ -195,23 +188,15 @@ export async function createSHA1Hash(apiKey, username, password, mode, paymentAm
 		mode,
 		paymentAmount,
 		merchantUniquePaymentId,
-		timestamp
+		timestamp: window.zpV3CompatMode?.omitTimestampFromHash ? '(omitted)' : timestamp
 	});
+	
+	if (window.zpV3CompatMode?.omitTimestampFromHash) {
+		console.warn('[createSHA1Hash] ⚠️ V3 Compat Mode: Timestamp omitted from hash');
+	}
+	
 	const hash = await sha1Hash(data);
 	console.info(`[createSHA1Hash] SHA1 👉 ${hash}`);
-	// Debugging output:
-	const debugInput = [apiKey, username, password, mode, paymentAmount, merchantUniquePaymentId].join('|');
-    const debugHash = await sha1Hash(debugInput);
-	console.info('');
-	console.info('');
-	console.warn(`[createSHA1Hash] DEBUG:▶️`);
-	console.warn(`[createSHA1Hash] 👇 Input without timestamp 👇`);
-	console.warn({ debugInput });
-	console.warn(`[createSHA1Hash] 👇 Output 👇`);
-	console.warn({ debugHash });
-	console.warn(`[createSHA1Hash] DEBUG:🔚`);
-	console.info('');
-	console.info('');
 	return hash;
 }
 
@@ -227,7 +212,13 @@ export async function createSHA1Hash(apiKey, username, password, mode, paymentAm
  * @returns {Promise<string>} Promise resolving to the SHA-512 fingerprint hash.
  */
 export async function createSHA512Hash(apiKey, username, password, mode, paymentAmount, merchantUniquePaymentId, timestamp) {
-	const data = [apiKey, username, password, mode, paymentAmount, merchantUniquePaymentId, timestamp].join('|');
+	// Build data array based on compatibility mode
+	const dataArray = [apiKey, username, password, mode, paymentAmount, merchantUniquePaymentId];
+	if (!window.zpV3CompatMode?.omitTimestampFromHash) {
+		dataArray.push(timestamp);
+	}
+	
+	const data = dataArray.join('|');
 	console.log(`[createSHA512Hash] Fingerprint Payload 👇`);
 	console.json({
 		apiKey,
@@ -236,8 +227,13 @@ export async function createSHA512Hash(apiKey, username, password, mode, payment
 		mode,
 		paymentAmount,
 		merchantUniquePaymentId,
-		timestamp
+		timestamp: window.zpV3CompatMode?.omitTimestampFromHash ? '(omitted)' : timestamp
 	});
+	
+	if (window.zpV3CompatMode?.omitTimestampFromHash) {
+		console.warn('[createSHA512Hash] ⚠️ V3 Compat Mode: Timestamp omitted from hash');
+	}
+	
 	const hash = await sha512Hash(data);
 	console.info(`[createSHA512Hash] SHA-512 👉 ${hash}`);
 	return hash;
@@ -255,7 +251,13 @@ export async function createSHA512Hash(apiKey, username, password, mode, payment
  * @returns {string} Hex-encoded SHA-3-512 fingerprint hash.
  */
 export function createSHA3_512Hash(apiKey, username, password, mode, paymentAmount, merchantUniquePaymentId, timestamp) {
-	const data = [apiKey, username, password, mode, paymentAmount, merchantUniquePaymentId, timestamp].join('|');
+	// Build data array based on compatibility mode
+	const dataArray = [apiKey, username, password, mode, paymentAmount, merchantUniquePaymentId];
+	if (!window.zpV3CompatMode?.omitTimestampFromHash) {
+		dataArray.push(timestamp);
+	}
+	
+	const data = dataArray.join('|');
 
 	console.trace('[createSHA3_512Hash] Called from');
 	console.log(`[createSHA3_512Hash] Fingerprint Payload 👇`);
@@ -266,8 +268,13 @@ export function createSHA3_512Hash(apiKey, username, password, mode, paymentAmou
 		mode,
 		paymentAmount,
 		merchantUniquePaymentId,
-		timestamp
+		timestamp: window.zpV3CompatMode?.omitTimestampFromHash ? '(omitted)' : timestamp
 	});
+	
+	if (window.zpV3CompatMode?.omitTimestampFromHash) {
+		console.warn('[createSHA3_512Hash] ⚠️ V3 Compat Mode: Timestamp omitted from hash');
+	}
+	
 	const hash = sha3_512(data);
 	console.info(`[createSHA3_512Hash] SHA3-512 👉 ${hash}`);
 	return hash;

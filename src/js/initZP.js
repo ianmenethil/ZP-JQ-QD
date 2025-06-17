@@ -56,6 +56,17 @@ export async function initializeZenPayPlugin() {
 		const minHeightFromUI = $('#minHeightInput').val() ? $('#minHeightInput').val().trim() : '';
 		parsedConfig.minHeight = minHeightFromUI;
 
+		// Handle V3 compatibility mode
+		if (window.zpV3CompatMode?.omitMerchantCodeFromPayload) {
+			console.warn('[initializeZenPayPlugin] ⚠️ V3 Compat Mode: Omitting merchantCode from payload');
+			delete parsedConfig.merchantCode;
+		}
+
+		if (window.zpV3CompatMode?.omitTimestampFromHash) {
+			console.warn('[initializeZenPayPlugin] ⚠️ V3 Compat Mode: Omitting timestamp from payload');
+			delete parsedConfig.timestamp;
+		}
+
 		const sessionConfig = { ...parsedConfig };
 		sessionConfig.username = username;
 		sessionConfig.password = password;
@@ -67,7 +78,7 @@ export async function initializeZenPayPlugin() {
 		console.log('');
 		console.log('[initializeZenPayPlugin] 👇 Payment object initialized 👇');
 		console.info(payment.options);
-		payment.open();
+		const result = payment.init();
 	} catch (err) {
 		console.error('[initializeZenPayPlugin] Error initializing plugin:', err);
 		showError('Initialization Error', 'Unable to initialize plugin. See console for details.');
