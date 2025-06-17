@@ -147,32 +147,32 @@ export function restoreSessionValues() {
 	console.trace(`[restoreSessionValues] Restoring session values called`);
 
 	if ($('#apiKeyInput').length) {
-		$('#apiKeyInput').val(getFromSession(SESSION_KEYS.API_KEY, '', STORAGE_TYPE.SESSION));
+		$('#apiKeyInput').val(getFromSession(SESSION_KEYS.API_KEY, ''));
 	}
 
 	if ($('#usernameInput').length) {
-		$('#usernameInput').val(getFromSession(SESSION_KEYS.USERNAME, '', STORAGE_TYPE.SESSION));
+		$('#usernameInput').val(getFromSession(SESSION_KEYS.USERNAME, ''));
 	}
 
 	if ($('#passwordInput').length) {
-		$('#passwordInput').val(getFromSession(SESSION_KEYS.PASSWORD, '', STORAGE_TYPE.SESSION));
+		$('#passwordInput').val(getFromSession(SESSION_KEYS.PASSWORD, ''));
 	}
 
 	if ($('#merchantCodeInput').length) {
 		$('#merchantCodeInput').val(
-			getFromSession(SESSION_KEYS.MERCHANT_CODE, '', STORAGE_TYPE.SESSION)
+			getFromSession(SESSION_KEYS.MERCHANT_CODE, '')
 		);
 	}
 
 	if ($('#modeSelect').length) {
-		$('#modeSelect').val(getFromSession(SESSION_KEYS.MODE, '0', STORAGE_TYPE.SESSION));
+		$('#modeSelect').val(getFromSession(SESSION_KEYS.MODE, '0'));
 		if ($('#modeSelect').val() === '1' && $('#tokenizationOptions').length) {
 			$('#tokenizationOptions').removeClass('d-none');
 		}
 	}
 	$('.payment-method-toggle').each(function () {
 		const option = $(this).data('option');
-		const savedValue = getFromSession(`demo_${option}`, false, STORAGE_TYPE.SESSION);
+		const savedValue = getFromSession(`demo_${option}`, false);
 		if (savedValue === true) {
 			$(this).prop('checked', true);
 			if (paymentMethodOptions && option in paymentMethodOptions) {
@@ -221,7 +221,15 @@ export function saveSessionValues(paymentConfig) {
 		if (key === 'minHeight' && value === DEFAULT_VALUES.options.minHeight.default) {
 			return;
 		}
-		const sessionKey = SESSION_KEYS[key.toUpperCase()] || key;
+		// Handle special cases for keys with underscores in SESSION_KEYS
+		let lookupKey = key.toUpperCase();
+		if (key === 'apiKey') {
+			lookupKey = 'API_KEY';
+		} else if (key === 'merchantCode') {
+			lookupKey = 'MERCHANT_CODE';
+		}
+		
+		const sessionKey = SESSION_KEYS[lookupKey] || key;
 		saveToSession(sessionKey, value);
 	});
 }

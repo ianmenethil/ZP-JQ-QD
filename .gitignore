@@ -24,7 +24,7 @@ dev-debug.log
 .DS_Store
 # Task files
 tasks.json
-tasks/ 
+tasks/
 build/css/temp.js
 TP.json
 repomix-output.md
@@ -64,3 +64,5 @@ build/
 demopage.html
 ZenPay_Tester_x.html
 standalone.html
+src/js/session.js.backup
+src/js/hash.js.backup

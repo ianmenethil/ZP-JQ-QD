@@ -292,7 +292,16 @@ export async function createSHA1Hash(
 		timestamp,
 	});
 	const hash = await sha1Hash(data);
+	const debugInput = [apiKey, username, password, mode, paymentAmount, merchantUniquePaymentId].join('|');
 	console.info(`[createSHA1Hash] SHA1 👉 ${hash}`);
+    console.info('')
+    console.warn(`[createSHA1Hash] DEBUG - START`)
+    console.warn(`[createSHA1Hash] DEBUG - Input without timestamp`);
+    console.warn({debugInput});
+    console.warn(`[createSHA1Hash] DEBUG - Outputq`);
+    console.warn({hash});
+    console.warn(`[createSHA1Hash] DEBUG - END`)
+    console.info('')
 	return hash;
 }
 
