@@ -50,7 +50,7 @@ _playwright/
 .v3/
 tests/
 .v2/
-.v1/
+.v1-init-only/
 .scripts/
 .github/
 CCEP.json

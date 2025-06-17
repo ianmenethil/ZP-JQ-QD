@@ -256,7 +256,7 @@ window.zpV3CompatMode = {
 	omitMerchantCodeFromPayload: false
 };
 
-//**
+/**
  * Help function to display available debug commands
  */
 window.zenhelp = function() {
