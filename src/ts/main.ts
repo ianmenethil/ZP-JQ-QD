@@ -1,0 +1,195 @@
+/**
+ * @file main.ts
+ * @description Main module for event-handler registration and user interactions.
+ */
+
+import './applogger.ts';
+import { updateCodePreview, updateMinHeightBasedOnMode } from './codePreview.ts';
+import { initDownloadFunctionality } from './downloadApp.ts';
+import { initErrorCodesSystem } from './errorCodes.ts';
+import { initExtendedOptions } from './extendedOptions.ts';
+import { initFileInputListener } from './fileInput.ts';
+import { paymentMethodsTab } from './globals.ts';
+import { initializePaymentUrlBuilder } from './helpers.ts';
+import { initInputParametersModal } from './inputParameters.ts';
+import { initOutputParametersModal } from './outputParameters.ts';
+
+import {
+	initAdditionalOptionsListeners,
+	initCopyCodeListener,
+	initCredentialsListeners,
+	initEmailConfirmationListeners,
+	initInitializePluginListener,
+	initModeSelectListener,
+	initOptionTooltips,
+	initOverrideFeePayerToggle,
+	initPaymentAmountListener,
+	initPaymentMethodToggleListeners,
+	initPaymentModeChangeTooltip,
+	initPaymentModeHoverTooltip,
+	initUiMinHeightListener,
+	initUserModeToggle,
+	updateActionButtonsState, // Import this function to use after session restoration
+} from './initListeners.ts';
+import './keyboardShortcuts.ts';
+import {
+	generateAndPopulatePaymentIdentifiersInForm,
+	generateRandomPaymentAmountForForm,
+	initPlaceholder,
+	setupPlaceholderStyling,
+} from './placeholders.ts';
+import { loadCredentials, loadState } from './session.ts';
+import { initThemeToggle } from './theme.ts';
+import { initTooltips } from './tooltips.ts';
+
+/**
+ * Initialize header elements from headerVars dataset
+ */
+function initializeHeaderElements(): void {
+	try {
+		const headerVars = document.getElementById('headerVars');
+		if (!headerVars) {
+			console.warn('[initializeHeaderElements] headerVars element not found');
+			return;
+		}
+
+		// Initialize app title
+		const appTitle = document.getElementById('appTitle');
+		if (appTitle && headerVars.dataset['appTitle']) {
+			appTitle.textContent = headerVars.dataset['appTitle'];
+		}
+
+		// Initialize environment note (will be updated by URL builder)
+		const envNote = document.getElementById('envNote');
+		if (envNote) {
+			envNote.textContent = 'Test'; // Default until URL builder updates it
+		}
+
+		console.log('[initializeHeaderElements] Header elements initialized');
+	} catch (error) {
+		console.error('[initializeHeaderElements] Error initializing header elements:', error);
+	}
+}
+
+/**
+ * Initialize the entire application with all required modules and event listeners
+ * @returns Promise that resolves when initialization is complete
+ * @example
+ * ```typescript
+ * // Initialize the application
+ * await initializeApp();
+ * ```
+ */
+export async function initializeApp(): Promise<void> {
+	try {
+		// Initialize header elements
+		initializeHeaderElements();
+
+		// Initialize tooltips and UI components
+		initTooltips();
+		initPaymentModeHoverTooltip();
+		initPaymentModeChangeTooltip();
+
+		// Initialize form listeners
+		initCredentialsListeners();
+		initPaymentMethodToggleListeners();
+		initAdditionalOptionsListeners();
+		initUiMinHeightListener();
+		initModeSelectListener();
+		initInitializePluginListener();
+		initCopyCodeListener();
+		initFileInputListener();
+		initOptionTooltips();
+
+		// Initialize URL and email listeners (handled by initializePaymentUrlBuilder)
+		initEmailConfirmationListeners();
+
+		// Initialize theme and UI components
+		initThemeToggle();
+		initializePaymentUrlBuilder(true);
+		initExtendedOptions();
+		initPlaceholder();
+		setupPlaceholderStyling();
+
+		// Initialize payment-specific listeners
+		initPaymentAmountListener();
+		initUserModeToggle();
+		initOverrideFeePayerToggle();
+
+		// Restore session data
+		const credentials = loadCredentials();
+		if (credentials) {
+			const apiKeyInput = document.getElementById('apiKeyInput') as HTMLInputElement;
+			const usernameInput = document.getElementById('usernameInput') as HTMLInputElement;
+			const passwordInput = document.getElementById('passwordInput') as HTMLInputElement;
+			const merchantCodeInput = document.getElementById('merchantCodeInput') as HTMLInputElement;
+
+			if (apiKeyInput) apiKeyInput.value = credentials.apiKey;
+			if (usernameInput) usernameInput.value = credentials.username;
+			if (passwordInput) passwordInput.value = credentials.password;
+			if (merchantCodeInput) merchantCodeInput.value = credentials.merchantCode;
+		}
+
+		const state = loadState();
+		if (state) {
+			const callbackUrlInput = document.getElementById('callbackUrlInput') as HTMLInputElement;
+			if (callbackUrlInput) callbackUrlInput.value = state.callbackUrl;
+
+			// Restore payment method toggles
+			Object.assign(paymentMethodsTab, state.paymentMethods);
+
+			// Update UI toggles to match restored state
+			const updateToggle = (id: string, value: boolean) => {
+				const toggle = document.getElementById(id) as HTMLInputElement;
+				if (toggle) toggle.checked = value;
+			};
+
+			updateToggle('allowBankAcOneOffPayment', state.paymentMethods.allowBankAcOneOffPayment);
+			updateToggle('allowPayToOneOffPayment', state.paymentMethods.allowPayToOneOffPayment);
+			updateToggle('allowPayIdOneOffPayment', state.paymentMethods.allowPayIdOneOffPayment);
+			updateToggle('allowApplePayOneOffPayment', state.paymentMethods.allowApplePayOneOffPayment);
+			updateToggle('allowGooglePayOneOffPayment', state.paymentMethods.allowGooglePayOneOffPayment);
+			updateToggle('allowSlicePayOneOffPayment', state.paymentMethods.allowSlicePayOneOffPayment);
+			updateToggle('allowSaveCardUserOption', state.paymentMethods.allowSaveCardUserOption);
+		}
+
+		// Generate initial values and update UI
+		generateRandomPaymentAmountForForm();
+		generateAndPopulatePaymentIdentifiersInForm();
+		updateMinHeightBasedOnMode();
+		updateCodePreview();
+
+		// Update action buttons state if available
+		if (typeof updateActionButtonsState === 'function') {
+			updateActionButtonsState();
+		} else {
+			console.warn('[main] updateActionButtonsState not available after session restoration');
+		}
+
+		// Initialize download functionality
+		initDownloadFunctionality('#downloadDemoBtn');
+
+		// Initialize error codes system
+		initErrorCodesSystem();
+
+		// Initialize parameter modals
+		initInputParametersModal();
+		initOutputParametersModal();
+
+		console.log('[main] Application initialization completed successfully');
+	} catch (error) {
+		console.error('[main] Error during application initialization:', error);
+		throw new Error(
+			`Application initialization failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+		);
+	}
+}
+
+/**
+ * Initialize the application when the DOM is ready
+ */
+document.addEventListener('DOMContentLoaded', () => {
+	initializeApp().catch((error) => {
+		console.error('[main] Failed to initialize application:', error);
+	});
+});

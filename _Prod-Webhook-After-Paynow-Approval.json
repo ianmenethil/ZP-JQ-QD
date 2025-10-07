@@ -1,0 +1,29 @@
+{
+    "response": {
+        "paymentReference": "28528199",
+        "customerName": "Baal Destruction",
+        "customerReference": "e9bfb4a5-dffb-454c-aae8-8f10a46f3c5b",
+        "paymentStatus": 3,
+        "paymentStatusString": "Successful",
+        "baseAmount": 1,
+        "fundsToMerchant": 1,
+        "accountOrCardNo": "417529874",
+        "paymentAccount": "PayTo",
+        "processingDate": "2025-10-07T17:14:54",
+        "settlementDate": "2025-10-08T00:00:00",
+        "processorReference": "28528199",
+        "isPaymentSettledToMerchant": false,
+        "failureCode": "",
+        "failureReason": "",
+        "paymentCard": "PayTo",
+        "merchantUniquePaymentId": "5f223840-2099-48e7-b031-4b32abc3e56a",
+        "merchantCode": "testm",
+        "transactionSource": 36,
+        "transactionSourceString": "Public_Customer_OnlineOneOffPayment",
+        "customerFee": 0,
+        "processedAmount": 1,
+        "cardCategory": "PayTo",
+        "cardInformationSaved": false
+    },
+    "validationCode": "57b584f2849a10cda1195b1ee796f6d8ce6168cc7ec5a9b7466c67115317a41536a2c29693ad0601dec235068b2887b3b16114254310b87e8c2c32130edbd9d1"
+}

@@ -1,0 +1,17 @@
+{
+    "response": {
+        "token": "276487f8a1cc45abb3562bb2782d2e06",
+        "cardType": "PayTo",
+        "paymentDetail": {
+            "customerFee": 0,
+            "merchantFee": 0,
+            "processingAmount": 1,
+            "paymentAmount": 1
+        },
+        "isRestrictedCard": false,
+        "accountName": "TokenTest",
+        "accountNumber": "******874",
+        "doRedirect": true
+    },
+    "validationCode": "a9718f5fbdc2389abdebf8e5b2b106f4e031c5d2014647ada6d2ac1031a9b3cbd847fa62ebd751749cab1266dce031604c580ccc0ac39001571fbae8563cfcc0"
+}

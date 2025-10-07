@@ -1,58 +1,65 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+		<title>ZenPay Payment Plugin</title>
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ZenPay Payment Plugin</title>
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.12.1/font/bootstrap-icons.css" />
-    <!-- Highlight.js CSS -->
-    <link id="hljs-stylesheet" rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" />
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet" />
+		<!-- Fonts (Inter for new UI; keep Roboto if you like) -->
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap"
+			rel="stylesheet"
+		/>
 
-    <!-- ZenPay CSS -->
-    <link href="https://cdn.travelpay.com.au/css/zenpay.payment.css" rel="stylesheet" />
-    <!-- Custom CSS -->
-    <!-- <link rel="stylesheet" href="css/bundle.css" /> -->
-    <link rel="stylesheet" href="css/bundle.min.css" />
-</head>
+		<!-- Bootstrap core (CSS only is fine; JS included below for modals/tooltips used elsewhere) -->
+		<link
+			href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+			rel="stylesheet"
+		/>
+		<!-- Bootstrap Icons (main.html still uses `bi` icons) -->
+		<link
+			href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.12.1/font/bootstrap-icons.css"
+			rel="stylesheet"
+		/>
+		<!-- Highlight.js (optional; keep if you still use it) -->
+		<link
+			id="hljs-stylesheet"
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+		/>
 
-<body>
-    <!-- Header -->
-    @@include('header.html')
+		<!-- ZenPay plugin CSS (kept) -->
+		<link href="https://cdnuat.travelpay.com.au/css/zenpay.payment.css" rel="stylesheet" />
 
-    <!-- Main content -->
-    @@include('main.html')
+		<!-- New UI styles (place AFTER vendor so it wins) -->
+		<link rel="stylesheet" href="/css/styles.css" />
+	</head>
 
-    <!-- Modal -->
-    @@include('modal.html')
+	<body>
+		<!-- Header -->
+		@@include('header.html')
 
-    <!-- Footer -->
-    @@include('footer.html')
+		<!-- Main content -->
+		@@include('main.html')
 
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+		<!-- Modal(s) -->
+		@@include('modal.html')
 
-    <!-- highlight.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+		<!-- Footer -->
+		@@include('footer.html')
 
-    <!-- JS SHA3 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha3/0.9.3/sha3.min.js" crossorigin="anonymous"></script>
+		<!-- Vendor JS (no jQuery) -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+		<script
+			src="https://cdnjs.cloudflare.com/ajax/libs/js-sha3/0.9.3/sha3.min.js"
+			crossorigin="anonymous"
+		></script>
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+		<script src="https://cdn.travelpay.com.au/js/zenpay.payment.bs5.js"></script>
 
-    <!-- Other dependencies: Bootstrap, ZenPay -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.travelpay.com.au/js/zenpay.payment.bs5.js"></script>
-    <!-- Custom JavaScript -->
-    <!-- <script defer src="js/bundle.js"></script> -->
-    <script defer src="js/bundle.min.js"></script>
-</body>
-
+		<!-- App entry (Vite/TS) -->
+		<script type="module" src="/src/ts/index.ts"></script>
+	</body>
 </html>

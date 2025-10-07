@@ -1,19 +1,33 @@
-import js from '@eslint/js';
+import ts from '@typescript-eslint/eslint-plugin';
+import tsParser from '@typescript-eslint/parser';
 import globals from 'globals';
-import css from '@eslint/css';
-import { defineConfig } from 'eslint/config';
 
-export default defineConfig([
-	// JS files in src/js only
-	{ files: ['src/js/**/*.{js,mjs,cjs}'], plugins: { js }, extends: ['js/recommended'] },
-	{ files: ['src/js/**/*.{js,mjs,cjs}'], languageOptions: { globals: globals.browser } },
-	{ files: ['src/js.fp/**/*.{js,mjs,cjs}'], languageOptions: { globals: globals.browser } },
-	{ files: ['src/js.fp/**/*.{js,mjs,cjs}'], languageOptions: { globals: globals.browser } },
-	// CSS files in src/css only
-	{
-		files: ['src/css/**/*.css'],
-		plugins: { css },
-		language: 'css/css',
-		extends: ['css/recommended'],
-	},
-]);
+export default [
+    {
+        files: ['**/*.ts', '**/*.tsx'],
+        ignores: ['dist', 'build', 'coverage', 'node_modules'],
+        languageOptions: {
+            parser: tsParser,
+            ecmaVersion: 'latest',
+            sourceType: 'module',
+            globals: { ...globals.browser, ...globals.node },
+            parserOptions: { projectService: true },
+        },
+        plugins: { '@typescript-eslint': ts },
+        rules: {
+            'no-unused-vars': 'off',
+            '@typescript-eslint/no-unused-vars': ['error', {
+                argsIgnorePattern: '^_',
+                varsIgnorePattern: '^_',
+                caughtErrors: 'all',
+                caughtErrorsIgnorePattern: '^_',
+            }],
+            'no-constant-condition': 'error',
+            'no-duplicate-case': 'error',
+            'no-empty': ['error', { allowEmptyCatch: false }],
+            eqeqeq: ['error', 'always'],
+            'prefer-const': 'error',
+            'no-var': 'error',
+        },
+    },
+];

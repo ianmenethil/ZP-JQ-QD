@@ -1,0 +1,73 @@
+{
+    "compilerOptions": {
+        "target": "ES2020",
+        "lib": [
+            "ES2022",
+            "DOM",
+            "DOM.Iterable"
+        ],
+        "module": "ESNext",
+        "moduleResolution": "bundler",
+        "allowImportingTsExtensions": true,
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "noEmit": true,
+        "jsx": "preserve",
+        /* Strict Type Checking */
+        "strict": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "exactOptionalPropertyTypes": true,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        "noUncheckedIndexedAccess": true,
+        "noImplicitOverride": true,
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "noPropertyAccessFromIndexSignature": true,
+        "verbatimModuleSyntax": true,
+        "useUnknownInCatchVariables": true,
+        "allowUnusedLabels": false,
+        "allowUnreachableCode": false,
+        /* Module Resolution */
+        "baseUrl": ".",
+        "paths": {
+            "@/*": [
+                "src/*"
+            ],
+            "@/ts/*": [
+                "src/ts/*"
+            ],
+            "@/css/*": [
+                "src/css/*"
+            ],
+            "@/html/*": [
+                "src/html/*"
+            ]
+        },
+        /* Emit */
+        "declaration": true,
+        "declarationMap": true,
+        "sourceMap": true,
+        "outDir": "./build",
+        "removeComments": false,
+        "importHelpers": true,
+        /* Interop Constraints */
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "forceConsistentCasingInFileNames": true,
+        /* Type Checking */
+        "skipLibCheck": true
+    },
+    "include": [
+        "src/**/*.ts",
+        "src/**/*.js",
+        "vite.config.ts"
+, "src/ts/theme.bak", "src/ts/session.bak", "src/ts/placeholders.bak"    ],
+    "exclude": [
+        "node_modules",
+        "build",
+        "dist",
+        "src/ts.bak"
+    ]
+}

@@ -1,0 +1,88 @@
+<section class="card" id="configCard">
+  <div class="card-hd d-flex justify-content-between align-items-center">
+    <h2 class="mb-0">Plugin Configuration</h2>
+    <div class="d-flex gap-2">
+      <button
+        class="browse-btn-icon"
+        id="quickActionsBtn"
+        aria-label="Quick actions"
+        data-bs-toggle="popover"
+        data-bs-placement="bottom"
+        data-bs-trigger="click"
+        data-bs-html="true"
+        data-bs-title="Quick Actions"
+        data-bs-content="<div class='list-group'><a href='#' class='list-group-item list-group-item-action'><i class='bi bi-file-earmark-plus me-2'></i>New Configuration</a><a href='#' class='list-group-item list-group-item-action'><i class='bi bi-save me-2'></i>Save Current</a><a href='#' class='list-group-item list-group-item-action'><i class='bi bi-arrow-clockwise me-2'></i>Reset to Default</a></div>"
+      >
+        <i class="bi bi-three-dots-vertical"></i>
+      </button>
+      <button
+        class="browse-btn-icon"
+        id="browseConfigBtn"
+        title="Browse Configuration"
+        aria-label="Browse configuration"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+      >
+        <i class="bi bi-folder2-open"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="card-bd">
+    <!-- API Endpoint -->
+    <label class="form-label">API Endpoint</label>
+    <div class="position-relative mb-3">
+      <input
+        type="text"
+        class="form-control pe-5"
+        id="urlPreview"
+        placeholder="API Endpoint"
+        value="https://pay.sandbox.travelpay.com.au/online/v5"
+        readonly
+      />
+      <button
+        class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-secondary"
+        type="button"
+        id="urlBuilderBtn"
+        title="Configure API endpoint"
+      >
+        <i class="bi bi-gear-fill"></i>
+      </button>
+    </div>
+
+    <!-- Payment Mode -->
+    <label class="form-label">Payment Mode</label>
+    <div class="input-group mb-3">
+      <span class="input-group-text"><i class="bi bi-gear-fill"></i></span>
+      <select class="form-select border-start-0" id="modeSelect">
+        <option value="0">Payment Mode (0)</option>
+        <option value="1">Tokenization Mode (1)</option>
+        <option value="2">Custom Payment Mode (2)</option>
+        <option value="3">PreAuth Mode (3)</option>
+      </select>
+      <button
+        class="btn btn-outline-secondary payment-mode-info"
+        type="button"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        title="Select the payment processing mode"
+      >
+        <i class="bi bi-info-circle"></i>
+      </button>
+    </div>
+
+    <!-- Tabs (Bootstrap) -->
+    <ul class="nav nav-tabs" id="mainConfigTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="credentials-tab" data-bs-toggle="tab" data-bs-target="#credentials" type="button" role="tab" aria-controls="credentials" aria-selected="true">
+          <i class="bi bi-key me-1"></i>Credentials
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="additional-options-tab" data-bs-toggle="tab" data-bs-target="#additional-options" type="button" role="tab" aria-controls="additional-options" aria-selected="false">
+          <i class="bi bi-sliders me-1"></i>Options
+        </button>
+      </li>
+    </ul>
+
+    <div class="tab-content p-3 border border-top-0 rounded-bottom" id="mainConfigTabsContent">
