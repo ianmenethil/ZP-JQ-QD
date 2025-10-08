@@ -109,6 +109,30 @@ body {
   }
 }
 
+/* Responsive layout for second row - when screen gets smaller */
+@media (max-width: 992px) {
+  /* On smaller screens, make the second row wrap to 3+1 layout */
+  .second-row-responsive .col-md-6:first-child {
+    /* Left side: Email Settings | Display Settings */
+    order: 1;
+  }
+
+  .second-row-responsive .col-md-6:last-child {
+    /* Right side: User Mode | Override Fee Payer */
+    order: 2;
+  }
+
+  /* Make the right side stack vertically on very small screens */
+  .second-row-responsive .col-md-6:last-child .row {
+    flex-direction: column;
+  }
+
+  .second-row-responsive .col-md-6:last-child .col-md-6 {
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+}
+
 @media (max-width: 768px) {
   .grid {
     gap: 8px;
@@ -155,6 +179,21 @@ body {
 .grid > * {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.15) rgba(255, 255, 255, 0.05);
+}
+
+/* Disabled button styling */
+.btn-disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  background-color: #6c757d !important;
+  border-color: #6c757d !important;
+  color: #ffffff !important;
+}
+
+.btn-disabled:hover {
+  background-color: #6c757d !important;
+  border-color: #6c757d !important;
+  color: #ffffff !important;
 }
 
 /* ========== COMPACT LAYOUT OPTIMIZATIONS ========== */
@@ -911,4 +950,104 @@ textarea.form-control {
   .payment-method-name {
     font-size: 0.75rem;
   }
+}
+
+/* ========== POPOVER THEME ALIGNMENT ========== */
+.popover {
+  background-color: var(--card);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.popover .popover-body {
+  background-color: var(--card);
+  color: var(--text);
+  padding: 0;
+}
+
+/* ========== POPOVER CARD LAYOUT ========== */
+.popover-cards-container {
+  display: flex;
+  gap: 0.5rem;
+  padding: 20px;
+  min-width: 280px;
+}
+
+/* Reuse existing payment method styles */
+.popover-card {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform 0.15s ease;
+  flex: 1;
+  min-width: 100px;
+}
+
+.popover-card .popover-card-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  text-align: center;
+  border-radius: 10px;
+  padding: 0.6rem 0.4rem;
+  color: var(--muted);
+  background: var(--card-2);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  height: 100%;
+}
+
+.popover-card:hover .popover-card-label {
+  transform: translateY(-2px);
+  border-color: var(--primary);
+}
+
+.popover-card.selected .popover-card-label {
+  color: var(--text);
+  border-color: transparent;
+  background: var(--primary);
+}
+
+.popover-card-icon {
+  font-size: 1.2rem;
+  color: var(--muted);
+  transition: color 0.2s ease;
+}
+
+.popover-card.selected .popover-card-icon {
+  color: var(--text);
+}
+
+.popover-card-title {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.popover-card.selected .popover-card-title {
+  color: var(--text);
+}
+
+.popover-card-subtitle {
+  font-size: 0.6rem;
+  color: var(--muted);
+  line-height: 1.2;
+}
+
+.popover-card.selected .popover-card-subtitle {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.popover-card.selected::after {
+  content: "✓";
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  color: var(--text);
+  font-weight: bold;
+  font-size: 0.8rem;
 }

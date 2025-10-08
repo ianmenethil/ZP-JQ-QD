@@ -11,7 +11,7 @@ import { initExtendedOptions } from './extendedOptions.ts';
 import { initFileInputListener } from './fileInput.ts';
 import { paymentMethodsTab } from './globals.ts';
 import { initializePaymentUrlBuilder } from './helpers.ts';
-import { initInputParametersModal } from './inputParameters.ts';
+import { initInputParametersModal, showParameterModal } from './inputParameters.ts';
 import { initOutputParametersModal } from './outputParameters.ts';
 
 import {
@@ -22,12 +22,14 @@ import {
 	initInitializePluginListener,
 	initModeSelectListener,
 	initOptionTooltips,
+	initOverrideFeePayerPopover,
 	initOverrideFeePayerToggle,
 	initPaymentAmountListener,
 	initPaymentMethodToggleListeners,
 	initPaymentModeChangeTooltip,
 	initPaymentModeHoverTooltip,
 	initUiMinHeightListener,
+	initUserModePopover,
 	initUserModeToggle,
 	updateActionButtonsState, // Import this function to use after session restoration
 } from './initListeners.ts';
@@ -36,35 +38,6 @@ import { initPlaceholder, setupPlaceholderStyling } from './placeholders.ts';
 import { loadCredentials, loadState } from './session.ts';
 import { initThemeToggle } from './theme.ts';
 import { initTooltips } from './tooltips.ts';
-
-/**
- * Initialize header elements from headerVars dataset
- */
-function initializeHeaderElements(): void {
-	try {
-		const headerVars = document.getElementById('headerVars');
-		if (!headerVars) {
-			console.warn('[initializeHeaderElements] headerVars element not found');
-			return;
-		}
-
-		// Initialize app title
-		const appTitle = document.getElementById('appTitle');
-		if (appTitle && headerVars.dataset['appTitle']) {
-			appTitle.textContent = headerVars.dataset['appTitle'];
-		}
-
-		// Initialize environment note (will be updated by URL builder)
-		const envNote = document.getElementById('envNote');
-		if (envNote) {
-			envNote.textContent = 'Test'; // Default until URL builder updates it
-		}
-
-		console.log('[initializeHeaderElements] Header elements initialized');
-	} catch (error) {
-		console.error('[initializeHeaderElements] Error initializing header elements:', error);
-	}
-}
 
 /**
  * Initialize the entire application with all required modules and event listeners
@@ -78,7 +51,6 @@ function initializeHeaderElements(): void {
 export async function initializeApp(): Promise<void> {
 	try {
 		// Initialize header elements
-		initializeHeaderElements();
 
 		// Initialize tooltips and UI components
 		initTooltips();
@@ -98,6 +70,8 @@ export async function initializeApp(): Promise<void> {
 
 		// Initialize URL and email listeners (handled by initializePaymentUrlBuilder)
 		initEmailConfirmationListeners();
+		initOverrideFeePayerPopover();
+		initUserModePopover();
 
 		// Initialize theme and UI components
 		initThemeToggle();
@@ -171,6 +145,9 @@ export async function initializeApp(): Promise<void> {
 		// Initialize parameter modals
 		initInputParametersModal();
 		initOutputParametersModal();
+
+		// Make showParameterModal globally available for info icons
+		(window as any).showParameterModal = showParameterModal;
 
 		console.log('[main] Application initialization completed successfully');
 	} catch (error) {

@@ -485,6 +485,3 @@ export function initErrorCodesSystem(): void {
 		showErrorDetails,
 	} as const;
 }
-
-// Don't auto-initialize - let main.ts handle it
-// initErrorCodesSystem();

@@ -365,7 +365,9 @@ export interface InputParameter {
 }
 
 /** Strongly-typed readonly view of the JSON */
-export const INPUT_PARAMETERS: readonly InputParameter[] = JSON.parse(INPUT_PARAMS) as InputParameter[];
+export const INPUT_PARAMETERS: readonly InputParameter[] = JSON.parse(
+	INPUT_PARAMS
+) as InputParameter[];
 
 /** Return an object of defaults for parameters that specify a non-null default */
 export function getDefaults(): Record<string, unknown> {
@@ -546,7 +548,9 @@ function renderInputParameters(params: InputParameter[], container: HTMLElement)
 					</tr>
 				</thead>
 				<tbody>
-					${params.map(param => `
+					${params
+						.map(
+							(param) => `
 						<tr>
 							<td><code>${escapeHtml(param.name)}</code></td>
 							<td><span class="badge bg-secondary">${escapeHtml(param.type)}</span></td>
@@ -554,7 +558,9 @@ function renderInputParameters(params: InputParameter[], container: HTMLElement)
 							<td>${param.condition ? escapeHtml(param.condition) : '-'}</td>
 							<td>${escapeHtml(param.description)}</td>
 						</tr>
-					`).join('')}
+					`
+						)
+						.join('')}
 				</tbody>
 			</table>
 		</div>
@@ -565,12 +571,13 @@ function renderInputParameters(params: InputParameter[], container: HTMLElement)
 
 function filterInputParameters(searchText: string): InputParameter[] {
 	const q = searchText.toLowerCase();
-	return INPUT_PARAMETERS.filter((p) =>
-		!q ||
-		p.name.toLowerCase().includes(q) ||
-		p.description.toLowerCase().includes(q) ||
-		p.type.toLowerCase().includes(q) ||
-		(p.condition ?? '').toLowerCase().includes(q)
+	return INPUT_PARAMETERS.filter(
+		(p) =>
+			!q ||
+			p.name.toLowerCase().includes(q) ||
+			p.description.toLowerCase().includes(q) ||
+			p.type.toLowerCase().includes(q) ||
+			(p.condition ?? '').toLowerCase().includes(q)
 	);
 }
 
@@ -607,5 +614,31 @@ export function initInputParametersModal(): void {
 		});
 	}
 
+	// Make rerender globally available for info icon functions
+	(window as any).inputParametersRerender = rerender;
+	(window as any).inputParametersModal = modal;
+	(window as any).inputParametersSearchInput = searchInput;
+
 	console.log('[inputParameters] Modal initialized with', INPUT_PARAMETERS.length, 'parameters');
+}
+
+/**
+ * Show input parameters modal with pre-filtered search
+ */
+export function showParameterModal(searchTerm: string): void {
+	const modal = (window as any).inputParametersModal;
+	const searchInput = (window as any).inputParametersSearchInput;
+	const rerender = (window as any).inputParametersRerender;
+
+	if (!modal || !searchInput || !rerender) {
+		console.warn('[inputParameters] Modal not initialized');
+		return;
+	}
+
+	// Pre-fill search with the term
+	searchInput.value = searchTerm;
+
+	// Trigger the existing filter
+	rerender();
+	modal.show();
 }

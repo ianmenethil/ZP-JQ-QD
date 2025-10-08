@@ -8,6 +8,7 @@ import { updateCodePreview } from './codePreview.ts';
 import { DomUtils, extendedOptions } from './globals.ts';
 import { generateAndSetUuids, generateEmail, generateFirstLastName } from './helpers.ts';
 import { updateRedirectUrlInForm } from './paymentUrlBuilder.ts';
+import { FIELD_IDS } from './placeholders.ts';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -17,40 +18,40 @@ import { updateRedirectUrlInForm } from './paymentUrlBuilder.ts';
  * Customer name data interface
  */
 export interface CustomerNameData {
-    firstName: string;
-    lastName: string;
-    fullName: string;
+	firstName: string;
+	lastName: string;
+	fullName: string;
 }
 
 /**
  * Extended options configuration interface
  */
 export interface ExtendedOptionsConfig {
-    generateCustomerData?: boolean;
-    generateUuids?: boolean;
-    setupEventListeners?: boolean;
-    updateRedirectUrl?: boolean;
+	generateCustomerData?: boolean;
+	generateUuids?: boolean;
+	setupEventListeners?: boolean;
+	updateRedirectUrl?: boolean;
 }
 
 /**
  * Form field mapping interface for extended options
  */
 export interface ExtendedOptionsFieldMapping {
-    [inputElementId: string]: keyof typeof extendedOptions;
+	[inputElementId: string]: keyof typeof extendedOptions;
 }
 
 /**
  * Extended options initialization error class
  */
 export class ExtendedOptionsError extends Error {
-    constructor(
-        message: string,
-        public readonly operation: 'generate' | 'setup' | 'update',
-        public override readonly cause?: Error
-    ) {
-        super(message);
-        this.name = 'ExtendedOptionsError';
-    }
+	constructor(
+		message: string,
+		public readonly operation: 'generate' | 'setup' | 'update',
+		public override readonly cause?: Error
+	) {
+		super(message);
+		this.name = 'ExtendedOptionsError';
+	}
 }
 
 // ============================================================================
@@ -61,23 +62,23 @@ export class ExtendedOptionsError extends Error {
  * Default extended options configuration
  */
 const DEFAULT_CONFIG: Required<ExtendedOptionsConfig> = {
-    generateCustomerData: true,
-    generateUuids: true,
-    setupEventListeners: true,
-    updateRedirectUrl: true,
+	generateCustomerData: true,
+	generateUuids: true,
+	setupEventListeners: true,
+	updateRedirectUrl: true,
 } as const;
 
 /**
  * Form field to extended options property mapping
  */
 const FORM_FIELD_MAPPING: ExtendedOptionsFieldMapping = {
-    redirectUrlInput: 'redirectUrl',
-    callbackUrlInput: 'callbackUrl',
-    customerNameInput: 'customerName',
-    customerReferenceInput: 'customerReference',
-    customerEmailInput: 'customerEmail',
-    merchantUniquePaymentIdInput: 'merchantUniquePaymentId',
-    contactNumberInput: 'contactNumber',
+	redirectUrlInput: 'redirectUrl',
+	callbackUrlInput: 'callbackUrl',
+	customerNameInput: 'customerName',
+	customerReferenceInput: 'customerReference',
+	customerEmailInput: 'customerEmail',
+	merchantUniquePaymentIdInput: 'merchantUniquePaymentId',
+	contactNumberInput: 'contactNumber',
 } as const;
 
 // ============================================================================
@@ -90,7 +91,7 @@ const FORM_FIELD_MAPPING: ExtendedOptionsFieldMapping = {
  * @returns The field value as string
  */
 function getFormFieldValue(selector: string): string {
-    return DomUtils.getValue(selector);
+	return DomUtils.getValue(selector);
 }
 
 /**
@@ -100,12 +101,12 @@ function getFormFieldValue(selector: string): string {
  * @returns True if field was found and updated
  */
 function setFormFieldValue(selector: string, value: string): boolean {
-    try {
-        DomUtils.setValue(selector, value);
-        return true;
-    } catch {
-        return false;
-    }
+	try {
+		DomUtils.setValue(selector, value);
+		return true;
+	} catch {
+		return false;
+	}
 }
 
 /**
@@ -113,12 +114,18 @@ function setFormFieldValue(selector: string, value: string): boolean {
  * @param propertyName - Name of the property to update
  * @param value - Value to set
  */
-function updateExtendedOptionsProperty(propertyName: keyof typeof extendedOptions, value: string): void {
-    try {
-        (extendedOptions as any)[propertyName] = value;
-    } catch (error) {
-        console.warn(`[updateExtendedOptionsProperty] Failed to update property ${propertyName}:`, error);
-    }
+function updateExtendedOptionsProperty(
+	propertyName: keyof typeof extendedOptions,
+	value: string
+): void {
+	try {
+		(extendedOptions as any)[propertyName] = value;
+	} catch (error) {
+		console.warn(
+			`[updateExtendedOptionsProperty] Failed to update property ${propertyName}:`,
+			error
+		);
+	}
 }
 
 // ============================================================================
@@ -135,40 +142,51 @@ function updateExtendedOptionsProperty(propertyName: keyof typeof extendedOption
  * ```
  */
 export function generateCustomerData(): void {
-    try {
-        // Generate customer name data
-        const customerNameData = generateFirstLastName();
-        const customerEmail = generateEmail(customerNameData.firstName);
-        const customerMobileNumber = extendedOptions.contactNumber || '0400001002';
+	try {
+		// Generate customer name data
+		const customerNameData = generateFirstLastName();
+		const customerEmail = generateEmail(customerNameData.firstName);
+		const customerMobileNumber = extendedOptions.contactNumber || '0400001002';
 
-        // Set values in UI form fields
-        const fieldUpdates = [
-            { selector: '#customerNameInput', value: customerNameData.fullName, property: 'customerName' as const },
-            { selector: '#customerEmailInput', value: customerEmail, property: 'customerEmail' as const },
-            { selector: '#contactNumberInput', value: customerMobileNumber, property: 'contactNumber' as const },
-        ];
+		// Set values in UI form fields
+		const fieldUpdates = [
+			{
+				selector: FIELD_IDS.CUSTOMER_NAME,
+				value: customerNameData.fullName,
+				property: 'customerName' as const,
+			},
+			{
+				selector: FIELD_IDS.CUSTOMER_EMAIL,
+				value: customerEmail,
+				property: 'customerEmail' as const,
+			},
+			{
+				selector: FIELD_IDS.CONTACT_NUMBER,
+				value: customerMobileNumber,
+				property: 'contactNumber' as const,
+			},
+		];
 
-        fieldUpdates.forEach(({ selector, value, property }) => {
-            if (setFormFieldValue(selector, value)) {
-                updateExtendedOptionsProperty(property, value);
-            } else {
-                console.warn(`[generateCustomerData] Form field not found: ${selector}`);
-            }
-        });
+		fieldUpdates.forEach(({ selector, value, property }) => {
+			if (setFormFieldValue(selector, value)) {
+				updateExtendedOptionsProperty(property, value);
+			} else {
+				console.warn(`[generateCustomerData] Form field not found: ${selector}`);
+			}
+		});
 
-        console.log('[generateCustomerData] Customer data generated successfully:', {
-            name: customerNameData.fullName,
-            email: customerEmail,
-            contact: customerMobileNumber,
-        });
-
-    } catch (error) {
-        throw new ExtendedOptionsError(
-            'Failed to generate customer data',
-            'generate',
-            error instanceof Error ? error : undefined
-        );
-    }
+		console.log('[generateCustomerData] Customer data generated successfully:', {
+			name: customerNameData.fullName,
+			email: customerEmail,
+			contact: customerMobileNumber,
+		});
+	} catch (error) {
+		throw new ExtendedOptionsError(
+			'Failed to generate customer data',
+			'generate',
+			error instanceof Error ? error : undefined
+		);
+	}
 }
 
 /**
@@ -181,16 +199,16 @@ export function generateCustomerData(): void {
  * ```
  */
 export function generateUuidsForExtendedOptions(): void {
-    try {
-        generateAndSetUuids();
-        console.log('[generateUuidsForExtendedOptions] UUIDs generated successfully');
-    } catch (error) {
-        throw new ExtendedOptionsError(
-            'Failed to generate UUIDs for extended options',
-            'generate',
-            error instanceof Error ? error : undefined
-        );
-    }
+	try {
+		generateAndSetUuids();
+		console.log('[generateUuidsForExtendedOptions] UUIDs generated successfully');
+	} catch (error) {
+		throw new ExtendedOptionsError(
+			'Failed to generate UUIDs for extended options',
+			'generate',
+			error instanceof Error ? error : undefined
+		);
+	}
 }
 
 // ============================================================================
@@ -207,71 +225,78 @@ export function generateUuidsForExtendedOptions(): void {
  * ```
  */
 export function setupExtendedOptionsEventListeners(): void {
-    try {
-        // Setup blur event listeners for each mapped form field
-        Object.entries(FORM_FIELD_MAPPING).forEach(([inputElementId, optionPropertyName]) => {
-            const selector = `#${inputElementId}`;
-            const element = document.querySelector(selector) as HTMLInputElement;
+	try {
+		// Setup blur event listeners for each mapped form field
+		Object.entries(FORM_FIELD_MAPPING).forEach(([inputElementId, optionPropertyName]) => {
+			const selector = `#${inputElementId}`;
+			const element = document.querySelector(selector) as HTMLInputElement;
 
-            if (element) {
-                // Remove existing listeners to prevent duplicates
-                const existingHandler = element.getAttribute('data-extended-options-handler');
-                if (existingHandler) {
-                    element.removeEventListener('blur', (element as any)._extendedOptionsHandler);
-                }
+			if (element) {
+				// Remove existing listeners to prevent duplicates
+				const existingHandler = element.getAttribute('data-extended-options-handler');
+				if (existingHandler) {
+					element.removeEventListener('blur', (element as any)._extendedOptionsHandler);
+				}
 
-                // Create new blur listener
-                const blurHandler = () => {
-                    try {
-                        const inputValue = getFormFieldValue(selector);
-                        updateExtendedOptionsProperty(optionPropertyName, inputValue);
+				// Create new blur listener
+				const blurHandler = () => {
+					try {
+						const inputValue = getFormFieldValue(selector);
+						updateExtendedOptionsProperty(optionPropertyName, inputValue);
 
-                        // Update code preview if function is available
-                        if (typeof updateCodePreview === 'function') {
-                            updateCodePreview();
-                        }
-                    } catch (error) {
-                        console.error(`[setupExtendedOptionsEventListeners] Error handling blur for ${selector}:`, error);
-                    }
-                };
+						// Update code preview if function is available
+						if (typeof updateCodePreview === 'function') {
+							updateCodePreview();
+						}
+					} catch (error) {
+						console.error(
+							`[setupExtendedOptionsEventListeners] Error handling blur for ${selector}:`,
+							error
+						);
+					}
+				};
 
-                // Store handler reference and add listener
-                (element as any)._extendedOptionsHandler = blurHandler;
-                element.addEventListener('blur', blurHandler);
-                element.setAttribute('data-extended-options-handler', 'true');
-            }
-        });
+				// Store handler reference and add listener
+				(element as any)._extendedOptionsHandler = blurHandler;
+				element.addEventListener('blur', blurHandler);
+				element.setAttribute('data-extended-options-handler', 'true');
+			}
+		});
 
-        // Setup domain select change listener for redirect URL updates
-        const domainSelect = document.querySelector('#domainSelect') as HTMLSelectElement;
-        if (domainSelect) {
-            // Remove existing listener
-            if (domainSelect.getAttribute('data-extended-options-domain-handler')) {
-                domainSelect.removeEventListener('change', (domainSelect as any)._extendedOptionsDomainHandler);
-            }
+		// Setup domain select change listener for redirect URL updates
+		const domainSelect = document.querySelector('#domainSelect') as HTMLSelectElement;
+		if (domainSelect) {
+			// Remove existing listener
+			if (domainSelect.getAttribute('data-extended-options-domain-handler')) {
+				domainSelect.removeEventListener(
+					'change',
+					(domainSelect as any)._extendedOptionsDomainHandler
+				);
+			}
 
-            const changeHandler = () => {
-                try {
-                    updateRedirectUrlInForm();
-                } catch (error) {
-                    console.error('[setupExtendedOptionsEventListeners] Error updating redirect URL:', error);
-                }
-            };
+			const changeHandler = () => {
+				try {
+					updateRedirectUrlInForm();
+				} catch (error) {
+					console.error('[setupExtendedOptionsEventListeners] Error updating redirect URL:', error);
+				}
+			};
 
-            (domainSelect as any)._extendedOptionsDomainHandler = changeHandler;
-            domainSelect.addEventListener('change', changeHandler);
-            domainSelect.setAttribute('data-extended-options-domain-handler', 'true');
-        }
+			(domainSelect as any)._extendedOptionsDomainHandler = changeHandler;
+			domainSelect.addEventListener('change', changeHandler);
+			domainSelect.setAttribute('data-extended-options-domain-handler', 'true');
+		}
 
-        console.log(`[setupExtendedOptionsEventListeners] Set up event listeners for ${Object.keys(FORM_FIELD_MAPPING).length} form fields`);
-
-    } catch (error) {
-        throw new ExtendedOptionsError(
-            'Failed to setup extended options event listeners',
-            'setup',
-            error instanceof Error ? error : undefined
-        );
-    }
+		console.log(
+			`[setupExtendedOptionsEventListeners] Set up event listeners for ${Object.keys(FORM_FIELD_MAPPING).length} form fields`
+		);
+	} catch (error) {
+		throw new ExtendedOptionsError(
+			'Failed to setup extended options event listeners',
+			'setup',
+			error instanceof Error ? error : undefined
+		);
+	}
 }
 
 // ============================================================================
@@ -297,36 +322,35 @@ export function setupExtendedOptionsEventListeners(): void {
  * ```
  */
 export function initExtendedOptions(config: ExtendedOptionsConfig = {}): void {
-    try {
-        const finalConfig = { ...DEFAULT_CONFIG, ...config };
+	try {
+		const finalConfig = { ...DEFAULT_CONFIG, ...config };
 
-        // Generate customer data if requested
-        if (finalConfig.generateCustomerData) {
-            generateCustomerData();
-        }
+		// Generate customer data if requested
+		if (finalConfig.generateCustomerData) {
+			generateCustomerData();
+		}
 
-        // Generate UUIDs if requested
-        if (finalConfig.generateUuids) {
-            generateUuidsForExtendedOptions();
-        }
+		// Generate UUIDs if requested
+		if (finalConfig.generateUuids) {
+			generateUuidsForExtendedOptions();
+		}
 
-        // Setup event listeners if requested
-        if (finalConfig.setupEventListeners) {
-            setupExtendedOptionsEventListeners();
-        }
+		// Setup event listeners if requested
+		if (finalConfig.setupEventListeners) {
+			setupExtendedOptionsEventListeners();
+		}
 
-        // Update redirect URL if requested
-        if (finalConfig.updateRedirectUrl) {
-            updateRedirectUrlInForm();
-        }
+		// Update redirect URL if requested
+		if (finalConfig.updateRedirectUrl) {
+			updateRedirectUrlInForm();
+		}
 
-        console.log('[initExtendedOptions] Extended options initialization completed successfully');
-
-    } catch (error) {
-        throw new ExtendedOptionsError(
-            'Failed to initialize extended options',
-            'setup',
-            error instanceof Error ? error : undefined
-        );
-    }
+		console.log('[initExtendedOptions] Extended options initialization completed successfully');
+	} catch (error) {
+		throw new ExtendedOptionsError(
+			'Failed to initialize extended options',
+			'setup',
+			error instanceof Error ? error : undefined
+		);
+	}
 }
