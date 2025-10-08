@@ -67,8 +67,7 @@ function buildRedirectAndCallbackUrls(
 	callbackUrl: string;
 } {
 	return {
-		// redirectUrl: `https://${subdomain}.${domain}.com.au/demo/`,
-		redirectUrl: `https://client.zenithpayments.support/results`,
+		redirectUrl: `https://${subdomain}.${domain}.com.au/demo/`,
 		callbackUrl: `https://${subdomain}.${domain}.com.au/callback/`,
 	};
 }

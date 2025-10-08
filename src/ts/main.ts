@@ -32,12 +32,7 @@ import {
 	updateActionButtonsState, // Import this function to use after session restoration
 } from './initListeners.ts';
 import './keyboardShortcuts.ts';
-import {
-	generateAndPopulatePaymentIdentifiersInForm,
-	generateRandomPaymentAmountForForm,
-	initPlaceholder,
-	setupPlaceholderStyling,
-} from './placeholders.ts';
+import { initPlaceholder, setupPlaceholderStyling } from './placeholders.ts';
 import { loadCredentials, loadState } from './session.ts';
 import { initThemeToggle } from './theme.ts';
 import { initTooltips } from './tooltips.ts';
@@ -107,7 +102,7 @@ export async function initializeApp(): Promise<void> {
 		// Initialize theme and UI components
 		initThemeToggle();
 		initializePaymentUrlBuilder(true);
-		initExtendedOptions();
+		initExtendedOptions({ generateCustomerData: false });
 		initPlaceholder();
 		setupPlaceholderStyling();
 
@@ -154,8 +149,9 @@ export async function initializeApp(): Promise<void> {
 		}
 
 		// Generate initial values and update UI
-		generateRandomPaymentAmountForForm();
-		generateAndPopulatePaymentIdentifiersInForm();
+		// Note: Random value generation functions are available but not auto-populating fields
+		// generateRandomPaymentAmountForForm(); // Available but not auto-calling
+		// generateAndPopulatePaymentIdentifiersInForm(); // Available but not auto-calling
 		updateMinHeightBasedOnMode();
 		updateCodePreview();
 
