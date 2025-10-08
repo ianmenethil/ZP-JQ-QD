@@ -461,6 +461,9 @@ textarea.form-control {
 #codePreview {
   display: block;
   background: transparent;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 /* ========== PAYMENT METHOD COMPONENTS ========== */
