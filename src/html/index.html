@@ -34,7 +34,18 @@
 		<link href="https://cdnuat.travelpay.com.au/css/zenpay.payment.css" rel="stylesheet" />
 
 		<!-- New UI styles (place AFTER vendor so it wins) -->
-		<link rel="stylesheet" href="/css/styles.css" />
+		<link rel="stylesheet" href="/css/styles.css?v=1.0.0" />
+
+		<!-- Dynamic cache busting for development -->
+		<script>
+			// Add timestamp to CSS for cache busting in development
+			if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+				const link = document.querySelector('link[href*="styles.css"]');
+				if (link) {
+					link.href = link.href.split('?')[0] + '?v=' + Date.now();
+				}
+			}
+		</script>
 	</head>
 
 	<body>

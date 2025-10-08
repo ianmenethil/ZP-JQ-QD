@@ -12,13 +12,17 @@
   --danger: #ff6464;
   --warning: #ffc861;
   --radius: 12px;
-  --ring: 0 0 0 3px rgba(106,163,255,.25);
+  --ring: 0 0 0 3px rgba(106, 163, 255, 0.25);
 
-  --shadow: 0 10px 30px rgba(0,0,0,.35);
-  --shadow-sm: 0 6px 18px rgba(0,0,0,.28);
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  --shadow-sm: 0 6px 18px rgba(0, 0, 0, 0.28);
 
-  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  --sans: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  --mono:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+  --sans:
+    Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
 /* Light mode (supports either data-theme or Bootstrap's data-bs-theme) */
@@ -33,15 +37,19 @@
   --accent: #12b886;
   --danger: #ef4444;
   --warning: #f59e0b;
-  --ring: 0 0 0 3px rgba(59,130,246,.25);
+  --ring: 0 0 0 3px rgba(59, 130, 246, 0.25);
 
-  --shadow: 0 12px 30px rgba(21, 30, 56, .12);
-  --shadow-sm: 0 6px 18px rgba(21, 30, 56, .08);
+  --shadow: 0 12px 30px rgba(21, 30, 56, 0.12);
+  --shadow-sm: 0 6px 18px rgba(21, 30, 56, 0.08);
 }
 
 /* ---------- Base ---------- */
-* { box-sizing: border-box; }
-html, body { height: 100%; }
+* {
+  box-sizing: border-box;
+}
+html, body {
+  height: 100%;
+}
 body {
   margin: 0;
   padding: 0;
@@ -67,11 +75,11 @@ body {
   left: 50%;
   transform: translateX(-50%);
   bottom: 10vh;
-  height: 80vh;
+  min-height: 80vh;
   width: 90%;
   max-width: none;
   padding: 0 20px;
-  overflow: hidden;
+  overflow: auto;
   display: flex;
   flex-direction: column;
 }
@@ -80,18 +88,100 @@ body {
 .grid {
   flex: 1 1 auto;
   display: grid;
-  grid-template-columns: 1.15fr .85fr;
+  grid-template-columns: 2.33fr 1fr; /* 70% / 30% - flexible units */
   gap: 16px;
   min-height: 0;
   align-items: stretch;
 }
 
+/* Remove fixed width from configCard to make it responsive */
+#configCard {
+  width: auto !important; /* Remove fixed width */
+  min-width: 0; /* Allow shrinking */
+  max-width: 100%; /* Prevent overflow */
+}
+
+/* Responsive grid layout for different screen sizes */
+@media (max-width: 1200px) {
+  .grid {
+    grid-template-columns: 1fr; /* Single column on smaller screens */
+    gap: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .grid {
+    gap: 8px;
+  }
+
+  .wrap {
+    width: 95%; /* More width on mobile */
+    padding: 0 10px;
+  }
+}
+
+/* Grid items should handle their own overflow */
+.grid > * {
+  overflow: auto;
+  min-height: 0;
+}
+
+/* Custom scrollbar styling for dark theme */
+.grid > *::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.grid > *::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.grid > *::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.grid > *::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.grid > *::-webkit-scrollbar-corner {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Firefox scrollbar styling */
+.grid > * {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) rgba(255, 255, 255, 0.05);
+}
+
+/* ========== COMPACT LAYOUT OPTIMIZATIONS ========== */
+
+/* Option 3: Reduce input field spacing */
+.input-group {
+  margin-bottom: 0.5rem; /* Reduced from default */
+}
+
+.row {
+  margin-bottom: 0.2rem; /* Reduced from default */
+}
+
+.payment-method-grid {
+  gap: 0.5rem; /* Reduced gap between buttons */
+}
+
 @media (min-width: 1025px) {
-  .grid { grid-auto-rows: 1fr; }
+  .grid {
+    grid-auto-rows: 1fr;
+  }
 }
 
 @media (max-width: 1024px) {
-  .grid { grid-template-columns: 1fr; }
+  .grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ========== HEADER/TOPBAR ========== */
@@ -106,7 +196,7 @@ body {
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   background: var(--card);
-  border-bottom: 1px solid rgba(255,255,255,.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   padding: 0 24px;
 }
 
@@ -159,7 +249,7 @@ body {
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   background: var(--card);
-  border-top: 1px solid rgba(255,255,255,.08);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   padding: 0 24px;
   font-size: 0.8rem;
 }
@@ -188,7 +278,7 @@ body {
   border: 0;
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  overflow: hidden;
+  /* overflow: hidden; */
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -200,15 +290,15 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 14px 16px;
-  border-bottom: 1px solid rgba(255,255,255,.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   background: transparent;
 }
 
 .card-hd h2 {
   font-size: 14px;
-  letter-spacing: .6px;
+  letter-spacing: 0.6px;
   text-transform: uppercase;
-  opacity: .8;
+  opacity: 0.8;
   margin: 0;
 }
 
@@ -377,7 +467,7 @@ textarea.form-control {
 .payment-mode-info {
   background: transparent;
   color: var(--muted);
-  border-color: rgba(255,255,255,.12);
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
 /* ========== CHIPS/BADGES ========== */
@@ -388,8 +478,8 @@ textarea.form-control {
   gap: 6px;
   font-size: 0.75rem;
   color: var(--muted);
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   padding: 6px 10px;
   border-radius: 999px;
   position: relative;
@@ -409,14 +499,14 @@ textarea.form-control {
 
 /* ========== TABS ========== */
 .nav-tabs {
-  border-bottom: 1px solid rgba(255,255,255,.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   gap: 6px;
   background: transparent;
 }
 
 .nav-tabs .nav-link {
   color: var(--muted);
-  border: 1px solid rgba(255,255,255,.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 999px;
   background: transparent;
   padding: 6px 10px;
@@ -427,8 +517,8 @@ textarea.form-control {
 
 .nav-tabs .nav-link:hover {
   color: var(--text);
-  background: rgba(255,255,255,.06);
-  border-color: rgba(255,255,255,.12);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
 .nav-tabs .nav-link.active {
@@ -455,7 +545,7 @@ textarea.form-control {
   font-size: 13px;
   line-height: 1.5;
   overflow: auto;
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 
 #codePreview {
@@ -469,7 +559,7 @@ textarea.form-control {
 /* ========== PAYMENT METHOD COMPONENTS ========== */
 .payment-method-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
   gap: 0.5rem;
 }
 
@@ -491,7 +581,7 @@ textarea.form-control {
   padding: 0.6rem 0.4rem;
   color: var(--muted);
   background: var(--card-2);
-  border: 1px solid rgba(255,255,255,.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   cursor: pointer;
   transition: all 0.2s ease;
   height: 100%;
@@ -553,7 +643,7 @@ textarea.form-control {
   position: relative;
   display: flex;
   background: var(--card-2);
-  border: 1px solid rgba(255,255,255,.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   overflow: hidden;
 }
@@ -616,15 +706,15 @@ textarea.form-control {
 
 .modal-content {
   background: var(--card);
-  border: 1px solid rgba(255,255,255,.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .modal-header {
-  border-bottom: 1px solid rgba(255,255,255,.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .modal-footer {
-  border-top: 1px solid rgba(255,255,255,.08);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* ========== CODE HIGHLIGHTING (HLJS) ========== */
@@ -805,23 +895,6 @@ textarea.form-control {
 [data-theme="dark"] .hljs-meta,
 [data-bs-theme="dark"] .hljs-meta {
   color: #9e9e9e;
-}
-
-/* ========== HIDE TABS ========== */
-/* Hide only the tab navigation row, keep all content visible */
-.nav-tabs {
-  display: none !important;
-}
-
-/* Make all tab content visible without changing layout */
-.tab-content {
-  display: block !important;
-}
-
-.tab-pane {
-  display: block !important;
-  opacity: 1 !important;
-  position: static !important;
 }
 
 /* ========== RESPONSIVE ========== */

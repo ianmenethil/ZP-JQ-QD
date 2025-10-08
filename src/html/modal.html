@@ -1,150 +1,224 @@
 <!-- /src/html/modal.html -->
 
 <!-- Error Modal -->
-<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalTitle" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header bg-danger-subtle">
-        <h5 class="modal-title" id="errorModalTitle">Error</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div id="errorModalAlert" class="alert alert-danger d-none" role="alert"></div>
-        <div id="errorModalBody"><p>Something went wrong.</p></div>
-        <div class="mt-3">
-          <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse"
-                  data-bs-target="#errorModalDetails" aria-expanded="false" aria-controls="errorModalDetails">
-            View technical details
-          </button>
-          <div id="errorModalDetails" class="collapse mt-2">
-            <pre class="mb-0"><code id="errorModalCode">/* stack or payload here */</code></pre>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button id="errorCopyBtn" type="button" class="btn btn-outline-secondary">Copy details</button>
-        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
+<div
+	class="modal fade"
+	id="errorModal"
+	tabindex="-1"
+	aria-labelledby="errorModalTitle"
+	aria-hidden="true"
+>
+	<div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+		<div class="modal-content">
+			<div class="modal-header bg-danger-subtle">
+				<h5 class="modal-title" id="errorModalTitle">Error</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<div id="errorModalAlert" class="alert alert-danger d-none" role="alert"></div>
+				<div id="errorModalBody"><p>Something went wrong.</p></div>
+				<div class="mt-3">
+					<button
+						class="btn btn-sm btn-outline-secondary"
+						type="button"
+						data-bs-toggle="collapse"
+						data-bs-target="#errorModalDetails"
+						aria-expanded="false"
+						aria-controls="errorModalDetails"
+					>
+						View technical details
+					</button>
+					<div id="errorModalDetails" class="collapse mt-2">
+						<pre class="mb-0"><code id="errorModalCode">/* stack or payload here */</code></pre>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button id="errorCopyBtn" type="button" class="btn btn-outline-secondary">
+					Copy details
+				</button>
+				<button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
 </div>
 
 <!-- Error Codes Reference Modal -->
-<div class="modal fade" id="errorCodesModal" tabindex="-1" aria-labelledby="errorCodesModalTitle" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header bg-info-subtle">
-        <h5 class="modal-title" id="errorCodesModalTitle">ZenPay Error Codes Reference</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div class="row mb-3">
-          <div class="col-md-6">
-            <input type="text" id="errorSearchInput" class="form-control" placeholder="Search error codes...">
-          </div>
-          <div class="col-md-6">
-            <select id="errorCategoryFilter" class="form-select">
-              <option value="">All Categories</option>
-            </select>
-          </div>
-        </div>
-        <div class="table-responsive">
-          <table class="table table-hover">
-            <thead>
-              <tr>
-                <th>Code</th>
-                <th>Category</th>
-                <th>Description</th>
-              </tr>
-            </thead>
-            <tbody id="errorCodesTableBody"></tbody>
-          </table>
-        </div>
-        <div id="noErrorCodesFound" class="alert alert-info d-none" role="alert">
-          No error codes found matching your search criteria.
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
+<div
+	class="modal fade"
+	id="errorCodesModal"
+	tabindex="-1"
+	aria-labelledby="errorCodesModalTitle"
+	aria-hidden="true"
+>
+	<div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+		<div class="modal-content">
+			<div class="modal-header bg-info-subtle">
+				<h5 class="modal-title" id="errorCodesModalTitle">ZenPay Error Codes Reference</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<div class="row">
+					<div class="col-md-6">
+						<input
+							type="text"
+							id="errorSearchInput"
+							class="form-control"
+							placeholder="Search error codes..."
+						/>
+					</div>
+					<div class="col-md-6">
+						<select id="errorCategoryFilter" class="form-select">
+							<option value="">All Categories</option>
+						</select>
+					</div>
+				</div>
+				<div class="table-responsive">
+					<table class="table table-hover">
+						<thead>
+							<tr>
+								<th>Code</th>
+								<th>Category</th>
+								<th>Description</th>
+							</tr>
+						</thead>
+						<tbody id="errorCodesTableBody"></tbody>
+					</table>
+				</div>
+				<div id="noErrorCodesFound" class="alert alert-info d-none" role="alert">
+					No error codes found matching your search criteria.
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
 </div>
 
 <!-- Generic Info Modal -->
-<div class="modal fade" id="genericModal" tabindex="-1" aria-labelledby="genericModalTitle" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header bg-primary-subtle">
-        <h5 class="modal-title" id="genericModalTitle">Notice</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div id="genericModalBody" class="modal-body">…</div>
-      <div class="modal-footer">
-        <button id="genericOkBtn" type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
-      </div>
-    </div>
-  </div>
+<div
+	class="modal fade"
+	id="genericModal"
+	tabindex="-1"
+	aria-labelledby="genericModalTitle"
+	aria-hidden="true"
+>
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header bg-primary-subtle">
+				<h5 class="modal-title" id="genericModalTitle">Notice</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div id="genericModalBody" class="modal-body">…</div>
+			<div class="modal-footer">
+				<button id="genericOkBtn" type="button" class="btn btn-primary" data-bs-dismiss="modal">
+					OK
+				</button>
+			</div>
+		</div>
+	</div>
 </div>
 
 <!-- Confirm Modal -->
-<div class="modal fade" id="confirmModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-     aria-labelledby="confirmModalTitle" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header bg-warning-subtle">
-        <h5 class="modal-title" id="confirmModalTitle">Please confirm</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cancel"></button>
-      </div>
-      <div id="confirmModalBody" class="modal-body">Are you sure you want to proceed?</div>
-      <div class="modal-footer">
-        <button id="confirmCancelBtn" type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button id="confirmOkBtn" type="button" class="btn btn-warning">Confirm</button>
-      </div>
-    </div>
-  </div>
+<div
+	class="modal fade"
+	id="confirmModal"
+	data-bs-backdrop="static"
+	data-bs-keyboard="false"
+	tabindex="-1"
+	aria-labelledby="confirmModalTitle"
+	aria-hidden="true"
+>
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header bg-warning-subtle">
+				<h5 class="modal-title" id="confirmModalTitle">Please confirm</h5>
+				<button
+					type="button"
+					class="btn-close"
+					data-bs-dismiss="modal"
+					aria-label="Cancel"
+				></button>
+			</div>
+			<div id="confirmModalBody" class="modal-body">Are you sure you want to proceed?</div>
+			<div class="modal-footer">
+				<button
+					id="confirmCancelBtn"
+					type="button"
+					class="btn btn-outline-secondary"
+					data-bs-dismiss="modal"
+				>
+					Cancel
+				</button>
+				<button id="confirmOkBtn" type="button" class="btn btn-warning">Confirm</button>
+			</div>
+		</div>
+	</div>
 </div>
 
 <!-- Input Parameters Reference Modal -->
-<div class="modal fade" id="inputParametersModal" tabindex="-1" aria-labelledby="inputParametersModalTitle" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header bg-info-subtle">
-        <h5 class="modal-title" id="inputParametersModalTitle">Input Parameters Reference</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div class="mb-3">
-          <input type="text" id="inputParamSearchInput" class="form-control" placeholder="Search parameters...">
-        </div>
-        <div id="inputParametersContent"></div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
+<div
+	class="modal fade"
+	id="inputParametersModal"
+	tabindex="-1"
+	aria-labelledby="inputParametersModalTitle"
+	aria-hidden="true"
+>
+	<div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+		<div class="modal-content">
+			<div class="modal-header bg-info-subtle">
+				<h5 class="modal-title" id="inputParametersModalTitle">Input Parameters Reference</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<div class="mb-3">
+					<input
+						type="text"
+						id="inputParamSearchInput"
+						class="form-control"
+						placeholder="Search parameters..."
+					/>
+				</div>
+				<div id="inputParametersContent"></div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
 </div>
 
 <!-- Output Parameters Reference Modal -->
-<div class="modal fade" id="outputParametersModal" tabindex="-1" aria-labelledby="outputParametersModalTitle" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header bg-success-subtle">
-        <h5 class="modal-title" id="outputParametersModalTitle">Output Parameters Reference</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div class="mb-3">
-          <input type="text" id="outputParamSearchInput" class="form-control" placeholder="Search parameters...">
-        </div>
-        <div id="outputParametersContent"></div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
+<div
+	class="modal fade"
+	id="outputParametersModal"
+	tabindex="-1"
+	aria-labelledby="outputParametersModalTitle"
+	aria-hidden="true"
+>
+	<div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+		<div class="modal-content">
+			<div class="modal-header bg-success-subtle">
+				<h5 class="modal-title" id="outputParametersModalTitle">Output Parameters Reference</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<div class="mb-3">
+					<input
+						type="text"
+						id="outputParamSearchInput"
+						class="form-control"
+						placeholder="Search parameters..."
+					/>
+				</div>
+				<div id="outputParametersContent"></div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
 </div>
 
 <!-- URL Builder Modal -->
@@ -259,11 +333,22 @@
 </div>
 
 <!-- Toast container -->
-<div class="position-fixed top-0 end-0 p-3" style="z-index:1080">
-  <div id="appToast" class="toast align-items-center text-bg-secondary border-0" role="status" aria-live="polite" aria-atomic="true">
-    <div class="d-flex">
-      <div id="appToastBody" class="toast-body">Action completed.</div>
-      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-    </div>
-  </div>
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1080">
+	<div
+		id="appToast"
+		class="toast align-items-center text-bg-secondary border-0"
+		role="status"
+		aria-live="polite"
+		aria-atomic="true"
+	>
+		<div class="d-flex">
+			<div id="appToastBody" class="toast-body">Action completed.</div>
+			<button
+				type="button"
+				class="btn-close btn-close-white me-2 m-auto"
+				data-bs-dismiss="toast"
+				aria-label="Close"
+			></button>
+		</div>
+	</div>
 </div>
