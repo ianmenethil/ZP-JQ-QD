@@ -90,8 +90,7 @@ function buildCodeSnippet(config: CodeSnippetConfig): string {
 		const { apiKey, paymentAmount, mode, timestamp, merchantUniquePaymentId, fingerprint } = config;
 
 		const url = DomUtils.getValue('#urlPreview');
-		const merchantCode =
-			DomUtils.getValue('#merchantCodeInput') || DEFAULT_VALUES.credentials.merchantCode;
+		const merchantCode = DomUtils.getValue('#merchantCodeInput') || DEFAULT_VALUES.credentials.merchantCode;
 
 		// Get customer values or use placeholders
 		let customerReference = DomUtils.getValue('#customerReferenceInput');
@@ -124,8 +123,7 @@ function buildCodeSnippet(config: CodeSnippetConfig): string {
 			additionalReference = input?.placeholder || crypto.randomUUID();
 		}
 
-		const redirectUrl =
-			DomUtils.getValue('#redirectUrlInput') || DEFAULT_VALUES.extended.redirectUrl;
+		const redirectUrl = DomUtils.getValue('#redirectUrlInput') || DEFAULT_VALUES.extended.redirectUrl;
 		const callbackUrl = DomUtils.getValue('#callbackUrlInput');
 
 		// Start with required properties
@@ -170,9 +168,10 @@ function buildCodeSnippet(config: CodeSnippetConfig): string {
 			'allowGooglePayOneOffPayment',
 			'allowSlicePayOneOffPayment',
 			'allowSaveCardUserOption',
+			'allowUnionPayOneOffPayment',
 		];
 
-		paymentMethods.forEach((method) => {
+		paymentMethods.forEach(method => {
 			if (getCheckboxState(`#${method}`)) {
 				properties.push(`${method}: true`);
 			}
@@ -186,7 +185,7 @@ function buildCodeSnippet(config: CodeSnippetConfig): string {
 			'hideMerchantLogo',
 		];
 
-		additionalOptions.forEach((option) => {
+		additionalOptions.forEach(option => {
 			if (getCheckboxState(`#${option}`)) {
 				properties.push(`${option}: true`);
 			}
@@ -283,15 +282,7 @@ async function _updateCodePreviewInternal(): Promise<void> {
 		let fingerprint = '';
 
 		try {
-			if (
-				apiKey &&
-				username &&
-				password &&
-				paymentAmount &&
-				mode &&
-				timestamp &&
-				merchantUniquePaymentId
-			) {
+			if (apiKey && username && password && paymentAmount && mode && timestamp && merchantUniquePaymentId) {
 				fingerprint = await generateFingerprint(
 					apiKey,
 					username,
@@ -382,7 +373,7 @@ export function parseCodePreviewConfig(): ParsedCodeConfig {
 		const configLines = configText.split(',\n');
 		const parsedConfig: ParsedCodeConfig = {};
 
-		configLines.forEach((line) => {
+		configLines.forEach(line => {
 			const match = line.trim().match(/^([^:]+):\s*(.+)$/);
 			if (!match) return;
 

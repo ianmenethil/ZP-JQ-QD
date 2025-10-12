@@ -39,6 +39,7 @@ interface PaymentState {
 		allowGooglePayOneOffPayment: boolean;
 		allowSlicePayOneOffPayment: boolean;
 		allowSaveCardUserOption: boolean;
+		allowUnionPayOneOffPayment: boolean;
 	};
 	options: {
 		sendConfirmationEmailToCustomer: boolean;
@@ -60,8 +61,7 @@ interface PaymentState {
 // STORAGE HELPERS
 // ============================================================================
 
-const store: Storage | null =
-	typeof globalThis.sessionStorage !== 'undefined' ? globalThis.sessionStorage : null;
+const store: Storage | null = typeof globalThis.sessionStorage !== 'undefined' ? globalThis.sessionStorage : null;
 
 const KEYS = {
 	CREDENTIALS: 'ZPSC',
@@ -128,12 +128,7 @@ export function handleCredentialBlur(input: HTMLInputElement): void {
 /**
  * Save credentials to session storage (base64 encoded)
  */
-export function saveCredentials(
-	apiKey: string,
-	username: string,
-	password: string,
-	merchantCode: string
-): void {
+export function saveCredentials(apiKey: string, username: string, password: string, merchantCode: string): void {
 	if (!store) return;
 
 	const credentials: Credentials = {
@@ -206,6 +201,7 @@ export function saveState(callbackUrl?: string): void {
 			allowGooglePayOneOffPayment: getCheckboxValue('allowGooglePayOneOffPayment'),
 			allowSlicePayOneOffPayment: getCheckboxValue('allowSlicePayOneOffPayment'),
 			allowSaveCardUserOption: getCheckboxValue('allowSaveCardUserOption'),
+			allowUnionPayOneOffPayment: getCheckboxValue('allowUnionPayOneOffPayment'),
 		},
 		options: {
 			sendConfirmationEmailToCustomer: getCheckboxValue('sendConfirmationEmailToCustomer'),
@@ -263,8 +259,7 @@ export function loadState(): PaymentState | null {
 export const STORAGE_TYPE = { LOCAL: 'local', SESSION: 'session' } as const;
 type StorageType = (typeof STORAGE_TYPE)[keyof typeof STORAGE_TYPE];
 
-const lstore: Storage | null =
-	typeof globalThis.localStorage !== 'undefined' ? globalThis.localStorage : null;
+const lstore: Storage | null = typeof globalThis.localStorage !== 'undefined' ? globalThis.localStorage : null;
 
 function pickStorage(type: StorageType): Storage | null {
 	return type === STORAGE_TYPE.LOCAL ? lstore : store;
@@ -301,11 +296,7 @@ export function getFromStorage<T = unknown>(
 /**
  * Save value to storage (automatically base64 encoded)
  */
-export function saveToStorage(
-	key: string,
-	value: unknown,
-	type: StorageType = STORAGE_TYPE.SESSION
-): void {
+export function saveToStorage(key: string, value: unknown, type: StorageType = STORAGE_TYPE.SESSION): void {
 	const s = pickStorage(type);
 	if (!s) return;
 

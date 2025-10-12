@@ -1,13 +1,7 @@
 <!-- /src/html/modal.html -->
 
 <!-- Error Modal -->
-<div
-	class="modal fade"
-	id="errorModal"
-	tabindex="-1"
-	aria-labelledby="errorModalTitle"
-	aria-hidden="true"
->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalTitle" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
 		<div class="modal-content">
 			<div class="modal-header bg-danger-subtle">
@@ -34,9 +28,7 @@
 				</div>
 			</div>
 			<div class="modal-footer">
-				<button id="errorCopyBtn" type="button" class="btn btn-outline-secondary">
-					Copy details
-				</button>
+				<button id="errorCopyBtn" type="button" class="btn btn-outline-secondary">Copy details</button>
 				<button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
 			</div>
 		</div>
@@ -44,13 +36,7 @@
 </div>
 
 <!-- Error Codes Reference Modal -->
-<div
-	class="modal fade"
-	id="errorCodesModal"
-	tabindex="-1"
-	aria-labelledby="errorCodesModalTitle"
-	aria-hidden="true"
->
+<div class="modal fade" id="errorCodesModal" tabindex="-1" aria-labelledby="errorCodesModalTitle" aria-hidden="true">
 	<div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
 		<div class="modal-content">
 			<div class="modal-header bg-info-subtle">
@@ -97,13 +83,7 @@
 </div>
 
 <!-- Generic Info Modal -->
-<div
-	class="modal fade"
-	id="genericModal"
-	tabindex="-1"
-	aria-labelledby="genericModalTitle"
-	aria-hidden="true"
->
+<div class="modal fade" id="genericModal" tabindex="-1" aria-labelledby="genericModalTitle" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered">
 		<div class="modal-content">
 			<div class="modal-header bg-primary-subtle">
@@ -112,9 +92,7 @@
 			</div>
 			<div id="genericModalBody" class="modal-body">…</div>
 			<div class="modal-footer">
-				<button id="genericOkBtn" type="button" class="btn btn-primary" data-bs-dismiss="modal">
-					OK
-				</button>
+				<button id="genericOkBtn" type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
 			</div>
 		</div>
 	</div>
@@ -134,21 +112,11 @@
 		<div class="modal-content">
 			<div class="modal-header bg-warning-subtle">
 				<h5 class="modal-title" id="confirmModalTitle">Please confirm</h5>
-				<button
-					type="button"
-					class="btn-close"
-					data-bs-dismiss="modal"
-					aria-label="Cancel"
-				></button>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cancel"></button>
 			</div>
 			<div id="confirmModalBody" class="modal-body">Are you sure you want to proceed?</div>
 			<div class="modal-footer">
-				<button
-					id="confirmCancelBtn"
-					type="button"
-					class="btn btn-outline-secondary"
-					data-bs-dismiss="modal"
-				>
+				<button id="confirmCancelBtn" type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
 					Cancel
 				</button>
 				<button id="confirmOkBtn" type="button" class="btn btn-warning">Confirm</button>
@@ -222,13 +190,7 @@
 </div>
 
 <!-- URL Builder Modal -->
-<div
-	class="modal fade"
-	id="urlBuilderModal"
-	tabindex="-1"
-	aria-labelledby="urlBuilderModalLabel"
-	aria-hidden="true"
->
+<div class="modal fade" id="urlBuilderModal" tabindex="-1" aria-labelledby="urlBuilderModalLabel" aria-hidden="true">
 	<div class="modal-dialog">
 		<div class="modal-content">
 			<div class="modal-header bg-primary-subtle">
@@ -240,28 +202,38 @@
 				<!-- Subdomain -->
 				<div class="mb-3">
 					<label class="form-label small">Subdomain</label>
-					<div class="btn-group w-100" role="group" aria-label="Subdomain selector">
-						<input type="radio" class="btn-check" name="subdomain" id="subdomain-pay" value="pay" />
-						<label class="btn btn-outline-primary" for="subdomain-pay">pay</label>
+					<div class="program-selection w-100" role="group" aria-label="Subdomain selector">
+						<input
+							type="radio"
+							class="program-selection-check"
+							name="subdomain"
+							id="subdomain-pay"
+							value="pay"
+						/>
+						<label class="program-selection-btn program-selection-outline" for="subdomain-pay">pay</label>
 
 						<input
 							type="radio"
-							class="btn-check"
+							class="program-selection-check"
 							name="subdomain"
 							id="subdomain-pay-sandbox"
 							value="pay.sandbox"
 							checked
 						/>
-						<label class="btn btn-outline-primary" for="subdomain-pay-sandbox">pay.sandbox</label>
+						<label class="program-selection-btn program-selection-outline" for="subdomain-pay-sandbox"
+							>pay.sandbox</label
+						>
 
 						<input
 							type="radio"
-							class="btn-check"
+							class="program-selection-check"
 							name="subdomain"
 							id="subdomain-payuat"
 							value="payuat"
 						/>
-						<label class="btn btn-outline-primary" for="subdomain-payuat">payuat</label>
+						<label class="program-selection-btn program-selection-outline" for="subdomain-payuat"
+							>payuat</label
+						>
 					</div>
 				</div>
 
@@ -281,22 +253,22 @@
 				<!-- Version -->
 				<div class="mb-3">
 					<label class="form-label small">API Version</label>
-					<div class="btn-group w-100" role="group" aria-label="Version selector">
-						<input type="radio" class="btn-check" name="version" id="version-v3" value="v3" />
-						<label class="btn btn-outline-primary" for="version-v3">v3</label>
+					<div class="program-selection w-100" role="group" aria-label="Version selector">
+						<input type="radio" class="program-selection-check" name="version" id="version-v3" value="v3" />
+						<label class="program-selection-btn program-selection-outline" for="version-v3">v3</label>
 
-						<input type="radio" class="btn-check" name="version" id="version-v4" value="v4" />
-						<label class="btn btn-outline-primary" for="version-v4">v4</label>
+						<input type="radio" class="program-selection-check" name="version" id="version-v4" value="v4" />
+						<label class="program-selection-btn program-selection-outline" for="version-v4">v4</label>
 
 						<input
 							type="radio"
-							class="btn-check"
+							class="program-selection-check"
 							name="version"
 							id="version-v5"
 							value="v5"
 							checked
 						/>
-						<label class="btn btn-outline-primary" for="version-v5">v5</label>
+						<label class="program-selection-btn program-selection-outline" for="version-v5">v5</label>
 					</div>
 				</div>
 
@@ -348,40 +320,22 @@
 				<h5 class="modal-title" id="slicePayDepartureDateModalTitle">
 					<i class="bi bi-calendar-event me-2"></i>SlicePay Departure Date Required
 				</h5>
-				<button
-					type="button"
-					class="btn-close"
-					data-bs-dismiss="modal"
-					aria-label="Close"
-				></button>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 			</div>
 			<div class="modal-body">
-				<p class="text-muted mb-3">
-					SlicePay requires a departure date at least 21 days in advance.
-				</p>
+				<p class="text-muted mb-3">SlicePay requires a departure date at least 21 days in advance.</p>
 				<div class="input-group">
 					<span class="input-group-text">
 						<i class="bi bi-calendar-date"></i>
 					</span>
-					<input
-						type="date"
-						class="form-control"
-						id="departureDateInput"
-					/>
+					<input type="date" class="form-control" id="departureDateInput" />
 				</div>
 			</div>
 			<div class="modal-footer">
-				<button
-					id="slicePayCancelBtn"
-					type="button"
-					class="btn btn-outline-secondary"
-					data-bs-dismiss="modal"
-				>
+				<button id="slicePayCancelBtn" type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
 					Cancel
 				</button>
-				<button id="slicePayConfirmBtn" type="button" class="btn btn-primary">
-					Confirm
-				</button>
+				<button id="slicePayConfirmBtn" type="button" class="btn btn-primary">Confirm</button>
 			</div>
 		</div>
 	</div>

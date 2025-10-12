@@ -6,11 +6,7 @@
 import { parseCodePreviewConfig } from './codePreview.ts';
 import { generatePaymentSecurityFingerprint } from './core/fingerprintGenerator.ts';
 import { showError } from './modals/modal.ts';
-import {
-    getOriginalCredentialValue,
-    saveCredentials,
-    saveState,
-} from './session.ts';
+import { getOriginalCredentialValue, saveCredentials, saveState } from './session.ts';
 // Removed unnecessary import - using new Date().toISOString().slice(0, 19) directly
 
 // Import jQuery only for the zpPayment plugin (required dependency)
@@ -55,6 +51,7 @@ interface ZenPayPluginConfig {
 	allowGooglePayOneOffPayment?: boolean;
 	allowSlicePayOneOffPayment?: boolean;
 	allowSaveCardUserOption?: boolean;
+	allowUnionPayOneOffPayment?: boolean;
 	onPluginClose?: (params: LogPayload) => void;
 }
 
@@ -148,19 +145,11 @@ interface OnPluginCloseCallback {
  */
 function validateCredentials(username: string, password: string): void {
 	if (!username || username.trim().length === 0) {
-		throw new ZenPayValidationError(
-			'Username is required for initialization',
-			'username',
-			username
-		);
+		throw new ZenPayValidationError('Username is required for initialization', 'username', username);
 	}
 
 	if (!password || password.trim().length === 0) {
-		throw new ZenPayValidationError(
-			'Password is required for initialization',
-			'password',
-			password
-		);
+		throw new ZenPayValidationError('Password is required for initialization', 'password', password);
 	}
 }
 
@@ -171,11 +160,7 @@ function validateCredentials(username: string, password: string): void {
  */
 function validateApiKey(apiKey: string): void {
 	if (!apiKey || apiKey === '<<API-KEY>>' || apiKey.trim().length === 0) {
-		throw new ZenPayValidationError(
-			'A valid API Key is required for initialization',
-			'apiKey',
-			apiKey
-		);
+		throw new ZenPayValidationError('A valid API Key is required for initialization', 'apiKey', apiKey);
 	}
 }
 
@@ -281,9 +266,7 @@ export async function initializeZenPayPlugin(): Promise<void> {
 
 		// Handle V3 compatibility mode
 		if (window.zpV3CompatMode?.omitMerchantCodeFromPayload) {
-			console.warn(
-				'[initializeZenPayPlugin] ⚠️ V3 Compat Mode: Omitting merchantCode from payload'
-			);
+			console.warn('[initializeZenPayPlugin] ⚠️ V3 Compat Mode: Omitting merchantCode from payload');
 			delete parsedConfig.merchantCode;
 		}
 
@@ -296,14 +279,11 @@ export async function initializeZenPayPlugin(): Promise<void> {
 		saveCredentials(completeConfig.apiKey, username, password, completeConfig.merchantCode || '');
 
 		// Save complete state (payment methods, options, mode, etc.) when initialize is clicked
-		const callbackUrl =
-			(document.getElementById('callbackUrlInput') as HTMLInputElement)?.value || '';
+		const callbackUrl = (document.getElementById('callbackUrlInput') as HTMLInputElement)?.value || '';
 		saveState(callbackUrl);
 		console.log('[initializeZenPayPlugin] Saved credentials and complete form state to session storage');
 
-		const onPluginCloseLogFunction: OnPluginCloseCallback = function (
-			this: ZenPayPluginInstance
-		): void {
+		const onPluginCloseLogFunction: OnPluginCloseCallback = function (this: ZenPayPluginInstance): void {
 			console.log('[onPluginClose] Plugin closed, sending log via fetch...');
 			const logPayload: LogPayload = {
 				merchantUniquePaymentId: this.options.merchantUniquePaymentId,
