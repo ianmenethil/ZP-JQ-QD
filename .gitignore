@@ -54,7 +54,14 @@ tests/
 .v1-init-only/
 .scripts/
 .github/
+# Secret configuration files - DO NOT COMMIT
 CCEP.json
+CCEP.*.json
+TP.json
+TP.*.json
+SEP.json
+SEP.*.json
+
 babel.config.js
 eslint.config.js
 jest.config.js
