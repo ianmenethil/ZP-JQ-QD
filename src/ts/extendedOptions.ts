@@ -6,27 +6,30 @@
 
 import { updateCodePreview } from './codePreview.ts';
 import { DomUtils, extendedOptions } from './globals.ts';
-import { generateAndSetUuids, generateEmail, generateFirstLastName } from './helpers.ts';
 import { updateRedirectUrlInForm } from './paymentUrlBuilder.ts';
 import { FIELD_IDS } from './placeholders.ts';
+import {
+	generateZenPayEmailAddress as generateEmail,
+	generateRandomCustomerName as generateFirstLastName,
+} from './utilities.ts';
 
 // ============================================================================
 // TYPE DEFINITIONS
 // ============================================================================
 
-/**
- * Customer name data interface
- */
-export interface CustomerNameData {
-	firstName: string;
-	lastName: string;
-	fullName: string;
-}
+// /**
+//  * Customer name data interface
+//  */
+// export interface CustomerNameData {
+// 	firstName: string;
+// 	lastName: string;
+// 	fullName: string;
+// }
 
 /**
  * Extended options configuration interface
  */
-export interface ExtendedOptionsConfig {
+interface ExtendedOptionsConfig {
 	generateCustomerData?: boolean;
 	generateUuids?: boolean;
 	setupEventListeners?: boolean;
@@ -36,14 +39,14 @@ export interface ExtendedOptionsConfig {
 /**
  * Form field mapping interface for extended options
  */
-export interface ExtendedOptionsFieldMapping {
+interface ExtendedOptionsFieldMapping {
 	[inputElementId: string]: keyof typeof extendedOptions;
 }
 
 /**
  * Extended options initialization error class
  */
-export class ExtendedOptionsError extends Error {
+class ExtendedOptionsError extends Error {
 	constructor(
 		message: string,
 		public readonly operation: 'generate' | 'setup' | 'update',
@@ -141,7 +144,7 @@ function updateExtendedOptionsProperty(
  * console.log('Customer data generated and applied');
  * ```
  */
-export function generateCustomerData(): void {
+function generateCustomerData(): void {
 	try {
 		// Generate customer name data
 		const customerNameData = generateFirstLastName();
@@ -190,18 +193,29 @@ export function generateCustomerData(): void {
 }
 
 /**
- * Generate UUIDs for customer reference and merchant unique payment ID
+ * Generate UUIDs for customer reference and merchant unique payment ID (without populating form fields)
  * @throws {ExtendedOptionsError} When UUID generation fails
  * @example
  * ```typescript
- * generateUuidsForExtendedOptions();
+ * const uuids = generateUuidsForExtendedOptions();
  * console.log('UUIDs generated for extended options');
  * ```
  */
-export function generateUuidsForExtendedOptions(): void {
+/* function generateUuidsForExtendedOptions(): {
+	customerReferenceIdentifier: string;
+	merchantUniquePaymentIdentifier: string;
+} {
 	try {
-		generateAndSetUuids();
+		// Generate UUIDs directly using crypto.randomUUID()
+		const customerReferenceIdentifier = crypto.randomUUID();
+		const merchantUniquePaymentIdentifier = crypto.randomUUID();
+
 		console.log('[generateUuidsForExtendedOptions] UUIDs generated successfully');
+
+		return {
+			customerReferenceIdentifier,
+			merchantUniquePaymentIdentifier,
+		};
 	} catch (error) {
 		throw new ExtendedOptionsError(
 			'Failed to generate UUIDs for extended options',
@@ -209,7 +223,7 @@ export function generateUuidsForExtendedOptions(): void {
 			error instanceof Error ? error : undefined
 		);
 	}
-}
+} */
 
 // ============================================================================
 // EVENT LISTENER SETUP
@@ -224,7 +238,7 @@ export function generateUuidsForExtendedOptions(): void {
  * console.log('Event listeners set up for extended options');
  * ```
  */
-export function setupExtendedOptionsEventListeners(): void {
+function setupExtendedOptionsEventListeners(): void {
 	try {
 		// Setup blur event listeners for each mapped form field
 		Object.entries(FORM_FIELD_MAPPING).forEach(([inputElementId, optionPropertyName]) => {
@@ -330,10 +344,7 @@ export function initExtendedOptions(config: ExtendedOptionsConfig = {}): void {
 			generateCustomerData();
 		}
 
-		// Generate UUIDs if requested
-		if (finalConfig.generateUuids) {
-			generateUuidsForExtendedOptions();
-		}
+		// UUIDs are generated on-demand, not auto-populated
 
 		// Setup event listeners if requested
 		if (finalConfig.setupEventListeners) {

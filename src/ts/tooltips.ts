@@ -3,7 +3,7 @@ import { bootstrap } from './globals.ts';
 /**
  * Bootstrap Tooltip configuration interface
  */
-export interface TooltipConfig {
+interface TooltipConfig {
 	trigger?: string;
 	placement?: 'top' | 'bottom' | 'left' | 'right' | 'auto';
 	delay?: number | { show: number; hide: number };
@@ -19,7 +19,7 @@ export interface TooltipConfig {
 /**
  * Bootstrap Tooltip instance interface
  */
-export interface BootstrapTooltipInstance {
+interface BootstrapTooltipInstance {
 	show(): void;
 	hide(): void;
 	toggle(): void;
@@ -33,7 +33,7 @@ export interface BootstrapTooltipInstance {
 /**
  * Tooltip initialization error class
  */
-export class TooltipInitializationError extends Error {
+class TooltipInitializationError extends Error {
 	constructor(
 		message: string,
 		public readonly element?: HTMLElement,
@@ -55,11 +55,14 @@ function getTooltipTriggerElements(): HTMLElement[] {
 	return Array.from(document.querySelectorAll<HTMLElement>('[data-bs-toggle="tooltip"]'));
 }
 
-function createTooltipInstance(element: HTMLElement, config: TooltipConfig = {}): BootstrapTooltipInstance {
+function createTooltipInstance(
+	element: HTMLElement,
+	config: TooltipConfig = {}
+): BootstrapTooltipInstance {
 	try {
 		const defaultConfig: TooltipConfig = {
 			trigger: 'hover focus',
-			...config
+			...config,
 		};
 
 		// Dispose any existing instance first to avoid duplicates
@@ -68,20 +71,24 @@ function createTooltipInstance(element: HTMLElement, config: TooltipConfig = {})
 
 		return new bootstrap.Tooltip(element, defaultConfig) as BootstrapTooltipInstance;
 	} catch (error) {
-		throw new TooltipInitializationError('Failed to create tooltip instance', element, error instanceof Error ? error : undefined);
+		throw new TooltipInitializationError(
+			'Failed to create tooltip instance',
+			element,
+			error instanceof Error ? error : undefined
+		);
 	}
 }
 
-function disposeExistingTooltips(selector = '[data-bs-toggle="tooltip"]'): void {
-	try {
-		document.querySelectorAll<HTMLElement>(selector).forEach(el => {
-			const inst = bootstrap?.Tooltip?.getInstance?.(el);
-			inst?.dispose?.();
-		});
-	} catch (error) {
-		console.warn('[disposeExistingTooltips] Error disposing tooltips:', error);
-	}
-}
+/* function disposeExistingTooltips(selector = '[data-bs-toggle="tooltip"]'): void {
+    try {
+        document.querySelectorAll<HTMLElement>(selector).forEach((el) => {
+            const inst = bootstrap?.Tooltip?.getInstance?.(el);
+            inst?.dispose?.();
+        });
+    } catch (error) {
+        console.warn('[disposeExistingTooltips] Error disposing tooltips:', error);
+    }
+} */
 
 // ============================================================================
 // PUBLIC API
@@ -102,7 +109,7 @@ export function initTooltips(config: TooltipConfig = {}): BootstrapTooltipInstan
 		}
 
 		// Initialize popovers
-		document.querySelectorAll<HTMLElement>('[data-bs-toggle="popover"]').forEach(el => {
+		document.querySelectorAll<HTMLElement>('[data-bs-toggle="popover"]').forEach((el) => {
 			try {
 				const existing = bootstrap?.Popover?.getInstance?.(el);
 				existing?.dispose?.();
@@ -113,18 +120,18 @@ export function initTooltips(config: TooltipConfig = {}): BootstrapTooltipInstan
 		});
 
 		// Reinitialize tooltips when any .collapse finishes expanding
-		document.querySelectorAll<HTMLElement>('.collapse').forEach(colEl => {
+		document.querySelectorAll<HTMLElement>('.collapse').forEach((colEl) => {
 			const prev = collapseShownHandlers.get(colEl);
 			if (prev) colEl.removeEventListener('shown.bs.collapse', prev);
 
 			const handler: EventListener = () => {
 				try {
 					// Dispose inside this collapse
-					colEl.querySelectorAll<HTMLElement>('[data-bs-toggle="tooltip"]').forEach(inner => {
+					colEl.querySelectorAll<HTMLElement>('[data-bs-toggle="tooltip"]').forEach((inner) => {
 						bootstrap?.Tooltip?.getInstance?.(inner)?.dispose?.();
 					});
 					// Recreate inside this collapse
-					colEl.querySelectorAll<HTMLElement>('[data-bs-toggle="tooltip"]').forEach(inner => {
+					colEl.querySelectorAll<HTMLElement>('[data-bs-toggle="tooltip"]').forEach((inner) => {
 						try {
 							createTooltipInstance(inner, config);
 						} catch (err) {
@@ -144,21 +151,120 @@ export function initTooltips(config: TooltipConfig = {}): BootstrapTooltipInstan
 		return instances;
 	} catch (error) {
 		console.error('[initTooltips] Error during tooltip initialization:', error);
-		throw new TooltipInitializationError('Failed to initialize tooltips', undefined, error instanceof Error ? error : undefined);
+		throw new TooltipInitializationError(
+			'Failed to initialize tooltips',
+			undefined,
+			error instanceof Error ? error : undefined
+		);
 	}
 }
 
+// /**
+//  * Re-initialize tooltips for theme changes or dynamic content updates
+//  */
+// export function reinitializeTooltips(config: TooltipConfig = {}): BootstrapTooltipInstance[] {
+// 	try {
+// 		disposeExistingTooltips();
+// 		const instances = initTooltips(config);
+// 		console.log(`[reinitializeTooltips] Reinitialized ${instances.length} tooltips`);
+// 		return instances;
+// 	} catch (error) {
+// 		console.error('[reinitializeTooltips] Error during tooltip reinitialization:', error);
+// 		throw new TooltipInitializationError(
+// 			'Failed to reinitialize tooltips',
+// 			undefined,
+// 			error instanceof Error ? error : undefined
+// 		);
+// 	}
+// }
+
 /**
- * Re-initialize tooltips for theme changes or dynamic content updates
+ * Check if an input/textarea field has text overflow (is truncated)
  */
-export function reinitializeTooltips(config: TooltipConfig = {}): BootstrapTooltipInstance[] {
+function isTextTruncated(element: HTMLInputElement | HTMLTextAreaElement): boolean {
+	// For input elements, check if scrollWidth exceeds clientWidth
+	return element.scrollWidth > element.clientWidth;
+}
+
+/**
+ * Initialize auto-tooltips for all input and textarea fields that show full value on hover when truncated
+ */
+export function initTruncationTooltips(): void {
 	try {
-		disposeExistingTooltips();
-		const instances = initTooltips(config);
-		console.log(`[reinitializeTooltips] Reinitialized ${instances.length} tooltips`);
-		return instances;
+		// Select all input and textarea elements
+		const fields = document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
+			'input[type="text"], input[type="email"], input[type="url"], input[type="number"], textarea'
+		);
+
+		let count = 0;
+
+		fields.forEach((field) => {
+			// Skip if field already has a tooltip or is disabled
+			if (field.hasAttribute('data-bs-toggle') || field.disabled) {
+				return;
+			}
+
+			// Track tooltip instance on the element
+			let tooltipInstance: BootstrapTooltipInstance | null = null;
+			let isShowing = false;
+
+			// Add mouseenter listener to check for truncation
+			field.addEventListener('mouseenter', function (this: HTMLInputElement | HTMLTextAreaElement) {
+				// Only show tooltip if there's a value and it's truncated
+				if (this.value && isTextTruncated(this) && !isShowing) {
+					try {
+						// Dispose any existing tooltip first
+						if (tooltipInstance) {
+							tooltipInstance.dispose();
+							tooltipInstance = null;
+						}
+
+						// Set the title dynamically
+						this.setAttribute('data-bs-original-title', this.value);
+						this.setAttribute('title', this.value);
+
+						// Create and show tooltip with proper configuration
+						tooltipInstance = new bootstrap.Tooltip(this, {
+							trigger: 'hover',
+							placement: 'top',
+							container: 'body',
+							animation: true,
+						}) as BootstrapTooltipInstance;
+
+						tooltipInstance.show();
+						isShowing = true;
+					} catch (error) {
+						console.warn('[initTruncationTooltips] Error showing tooltip:', error);
+					}
+				}
+			});
+
+			// Add mouseleave listener to hide and dispose tooltip
+			field.addEventListener('mouseleave', function (this: HTMLInputElement | HTMLTextAreaElement) {
+				if (tooltipInstance && isShowing) {
+					try {
+						tooltipInstance.hide();
+						// Dispose after a short delay to allow hide animation
+						setTimeout(() => {
+							if (tooltipInstance) {
+								tooltipInstance.dispose();
+								tooltipInstance = null;
+							}
+							isShowing = false;
+							this.removeAttribute('data-bs-original-title');
+							this.removeAttribute('title');
+						}, 200);
+					} catch (error) {
+						console.warn('[initTruncationTooltips] Error hiding tooltip:', error);
+					}
+				}
+			});
+
+			count++;
+		});
+
+		console.log(`[initTruncationTooltips] Initialized truncation detection for ${count} fields`);
 	} catch (error) {
-		console.error('[reinitializeTooltips] Error during tooltip reinitialization:', error);
-		throw new TooltipInitializationError('Failed to reinitialize tooltips', undefined, error instanceof Error ? error : undefined);
+		console.error('[initTruncationTooltips] Error initializing truncation tooltips:', error);
 	}
 }

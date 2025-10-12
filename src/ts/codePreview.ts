@@ -1,9 +1,19 @@
-import { createDebouncedFunction  as debounce } from './utilities.ts';
-import { DEFAULT_VALUES, DomUtils, hljs } from './globals.ts';
-import { createSha3PaymentFingerprint as generateFingerprint } from './cryptographicFingerprintGenerator.ts';
-import { generateCurrentIsoTimestamp } from './utilities.ts';
+/**
+ * Code Preview Module
+ * @module codePreview
+ * @description Generates and displays ZenPay plugin initialization code with syntax highlighting
+ */
 
-export interface CodeSnippetConfig {
+import { createSha3PaymentFingerprint as generateFingerprint } from './core/fingerprintGenerator.ts';
+import { DEFAULT_VALUES, DomUtils, hljs } from './globals.ts';
+import {
+	createDebouncedFunction as debounce,
+	generateRandomContactNumber,
+	generateRandomPaymentAmount,
+} from './utilities.ts';
+
+/** Configuration for generating code snippet */
+interface CodeSnippetConfig {
 	apiKey: string;
 	paymentAmount: number;
 	mode: string;
@@ -15,7 +25,7 @@ export interface CodeSnippetConfig {
 /**
  * Parsed configuration from code preview
  */
-export interface ParsedCodeConfig {
+interface ParsedCodeConfig {
 	timeStamp?: string;
 	timestamp?: string;
 	url?: string;
@@ -31,13 +41,14 @@ export interface ParsedCodeConfig {
 	customerEmail?: string;
 	callbackUrl?: string;
 	contactNumber?: string;
+	additionalReference?: string;
 	minHeight?: number;
 	userMode?: number;
 	overrideFeePayer?: number;
 	[key: string]: unknown;
 }
 
-export class CodePreviewError extends Error {
+class CodePreviewError extends Error {
 	constructor(
 		message: string,
 		public readonly operation: string,
@@ -48,16 +59,32 @@ export class CodePreviewError extends Error {
 	}
 }
 
+/**
+ * Gets checked state of a checkbox element
+ * @param selector - CSS selector for checkbox
+ * @returns True if checked, false otherwise
+ */
 function getCheckboxState(selector: string): boolean {
 	const element = document.querySelector(selector) as HTMLInputElement;
 	return element?.checked || false;
 }
 
+/**
+ * Gets selected radio button value as number
+ * @param name - Radio button group name
+ * @returns Selected value as integer, 0 if none selected
+ */
 function getRadioValue(name: string): number {
 	const element = document.querySelector(`input[name="${name}"]:checked`) as HTMLInputElement;
 	return element ? parseInt(element.value, 10) : 0;
 }
 
+/**
+ * Builds JavaScript code snippet for ZenPay plugin initialization
+ * @param config - Code snippet configuration
+ * @returns Formatted JavaScript code string
+ * @throws {CodePreviewError} If snippet generation fails
+ */
 function buildCodeSnippet(config: CodeSnippetConfig): string {
 	try {
 		const { apiKey, paymentAmount, mode, timestamp, merchantUniquePaymentId, fingerprint } = config;
@@ -66,13 +93,40 @@ function buildCodeSnippet(config: CodeSnippetConfig): string {
 		const merchantCode =
 			DomUtils.getValue('#merchantCodeInput') || DEFAULT_VALUES.credentials.merchantCode;
 
-		// Get customer values without fallbacks
-		const customerReference = DomUtils.getValue('#customerReferenceInput');
-		const customerName = DomUtils.getValue('#customerNameInput');
-		const customerEmail = DomUtils.getValue('#customerEmailInput');
-		const redirectUrl = DomUtils.getValue('#redirectUrlInput') || DEFAULT_VALUES.extended.redirectUrl;
+		// Get customer values or use placeholders
+		let customerReference = DomUtils.getValue('#customerReferenceInput');
+		if (!customerReference) {
+			const input = document.getElementById('customerReferenceInput') as HTMLInputElement;
+			customerReference = input?.placeholder || crypto.randomUUID();
+		}
+
+		let customerName = DomUtils.getValue('#customerNameInput');
+		let customerEmail = DomUtils.getValue('#customerEmailInput');
+		if (!customerName) {
+			const input = document.getElementById('customerNameInput') as HTMLInputElement;
+			customerName = input?.placeholder || '';
+			// Only use placeholder for email if both are empty
+			if (!customerEmail) {
+				const emailInput = document.getElementById('customerEmailInput') as HTMLInputElement;
+				customerEmail = emailInput?.placeholder || '';
+			}
+		}
+
+		let contactNumber = DomUtils.getValue('#contactNumberInput');
+		if (!contactNumber) {
+			const input = document.getElementById('contactNumberInput') as HTMLInputElement;
+			contactNumber = input?.placeholder || generateRandomContactNumber();
+		}
+
+		let additionalReference = DomUtils.getValue('#additionalReferenceInput');
+		if (!additionalReference) {
+			const input = document.getElementById('additionalReferenceInput') as HTMLInputElement;
+			additionalReference = input?.placeholder || crypto.randomUUID();
+		}
+
+		const redirectUrl =
+			DomUtils.getValue('#redirectUrlInput') || DEFAULT_VALUES.extended.redirectUrl;
 		const callbackUrl = DomUtils.getValue('#callbackUrlInput');
-		const contactNumber = DomUtils.getValue('#contactNumberInput');
 
 		// Start with required properties
 		const properties: string[] = [
@@ -101,6 +155,10 @@ function buildCodeSnippet(config: CodeSnippetConfig): string {
 
 		if (callbackUrl) {
 			properties.push(`callbackUrl: "${callbackUrl}"`);
+		}
+
+		if (additionalReference) {
+			properties.push(`additionalReference: "${additionalReference}"`);
 		}
 
 		// Add payment method options
@@ -155,9 +213,15 @@ function buildCodeSnippet(config: CodeSnippetConfig): string {
 			properties.push(`overrideFeePayer: ${overrideFeePayer}`);
 		}
 
+		// Add display mode
+		const displayMode = getRadioValue('displayMode');
+		if (displayMode !== 0) {
+			properties.push(`displayMode: ${displayMode}`);
+		}
+
 		// Add minHeight if different from default
 		const minHeight = parseInt(DomUtils.getValue('#minHeightInput'), 10);
-    const defaultHeight = mode === '1' ? 600 : DEFAULT_VALUES.options.minHeight;
+		const defaultHeight = mode === '1' ? 600 : DEFAULT_VALUES.options.minHeight;
 		if (minHeight && minHeight !== defaultHeight) {
 			properties.push(`minHeight: ${minHeight}`);
 		}
@@ -165,6 +229,14 @@ function buildCodeSnippet(config: CodeSnippetConfig): string {
 		// Add contact number if provided
 		if (contactNumber) {
 			properties.push(`contactNumber: ${contactNumber}`);
+		}
+
+		// Add departure date if SlicePay is enabled
+		if (getCheckboxState('#allowSlicePayOneOffPayment')) {
+			const departureDate = DomUtils.getValue('#departureDateInput');
+			if (departureDate) {
+				properties.push(`departureDate: "${departureDate}"`);
+			}
 		}
 
 		let snippet = `var payment = $.zpPayment({\n    ${properties.join(',\n    ')}\n});`;
@@ -186,12 +258,26 @@ function buildCodeSnippet(config: CodeSnippetConfig): string {
  */
 async function _updateCodePreviewInternal(): Promise<void> {
 	try {
-        const timestamp = generateCurrentIsoTimestamp();
-		const merchantUniquePaymentId = DomUtils.getValue('#merchantUniquePaymentIdInput');
+		const timestamp = new Date().toISOString().slice(0, 19);
+
+		// Get values or use placeholders for empty fields
+		let merchantUniquePaymentId = DomUtils.getValue('#merchantUniquePaymentIdInput');
+		if (!merchantUniquePaymentId) {
+			const input = document.getElementById('merchantUniquePaymentIdInput') as HTMLInputElement;
+			merchantUniquePaymentId = input?.placeholder || crypto.randomUUID();
+		}
+
 		const apiKey = DomUtils.getValue('#apiKeyInput') || DEFAULT_VALUES.credentials.apiKey;
 		const username = DomUtils.getValue('#usernameInput') || DEFAULT_VALUES.credentials.username;
 		const password = DomUtils.getValue('#passwordInput') || DEFAULT_VALUES.credentials.password;
-		const paymentAmount = parseFloat(DomUtils.getValue('#paymentAmountInput'));
+
+		let paymentAmountStr = DomUtils.getValue('#paymentAmountInput');
+		if (!paymentAmountStr) {
+			const input = document.getElementById('paymentAmountInput') as HTMLInputElement;
+			paymentAmountStr = input?.placeholder || generateRandomPaymentAmount(10.0, 1000.0);
+		}
+		const paymentAmount = parseFloat(paymentAmountStr);
+
 		const mode = DomUtils.getValue('#modeSelect');
 
 		let fingerprint = '';
@@ -213,16 +299,19 @@ async function _updateCodePreviewInternal(): Promise<void> {
 					mode,
 					paymentAmount.toString(),
 					merchantUniquePaymentId,
-					timestamp,
+					timestamp
 				);
 			}
 		} catch (error) {
 			console.warn('[updateCodePreview] Could not generate fingerprint:', error);
 		}
 
+		// Normalize payment amount for API (remove decimal point)
+		const normalizedPaymentAmount = mode === '2' ? 0 : Math.floor(paymentAmount * 100);
+
 		const snippet = buildCodeSnippet({
 			apiKey,
-			paymentAmount,
+			paymentAmount: normalizedPaymentAmount,
 			mode,
 			timestamp,
 			merchantUniquePaymentId,
@@ -245,23 +334,36 @@ async function _updateCodePreviewInternal(): Promise<void> {
 	}
 }
 
+/**
+ * Updates minimum height input based on selected payment mode
+ * Mode 1 (tokenization) defaults to 600px, others use default height
+ */
 export function updateMinHeightBasedOnMode(): void {
 	try {
 		const mode = DomUtils.getValue('#modeSelect');
-    const defaultHeight = mode === '1' ? '600' : DEFAULT_VALUES.options.minHeight.toString();
+		const defaultHeight = mode === '1' ? '600' : DEFAULT_VALUES.options.minHeight.toString();
 
 		const minHeightInput = document.getElementById('minHeightInput') as HTMLInputElement;
 		if (minHeightInput) {
 			const currentHeight = minHeightInput.value;
-            if (!currentHeight || currentHeight === '600' || currentHeight === DEFAULT_VALUES.options.minHeight.toString()) {
-                minHeightInput.value = defaultHeight;
-            }
+			if (
+				!currentHeight ||
+				currentHeight === '600' ||
+				currentHeight === DEFAULT_VALUES.options.minHeight.toString()
+			) {
+				minHeightInput.value = defaultHeight;
+			}
 		}
 	} catch (error) {
 		console.error('[updateMinHeightBasedOnMode] Error updating min height:', error);
 	}
 }
 
+/**
+ * Parses configuration object from displayed code preview
+ * @returns Parsed configuration object
+ * @throws {CodePreviewError} If parsing fails
+ */
 export function parseCodePreviewConfig(): ParsedCodeConfig {
 	try {
 		const codePreviewText = DomUtils.getText('#codePreview');
@@ -319,4 +421,8 @@ export function parseCodePreviewConfig(): ParsedCodeConfig {
 	}
 }
 
+/**
+ * Debounced code preview update function (50ms delay)
+ * Updates preview with current form values and syntax highlighting
+ */
 export const updateCodePreview = debounce(_updateCodePreviewInternal, 50);

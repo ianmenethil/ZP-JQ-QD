@@ -1,0 +1,223 @@
+{
+  "mode02": [
+    {
+      "parameter": "CustomerName",
+      "value": "Same as input parameter."
+    },
+    {
+      "parameter": "CustomerReference",
+      "value": "Same as input parameter."
+    },
+    {
+      "parameter": "MerchantUniquePaymentId",
+      "value": "Same as input parameter."
+    },
+    {
+      "parameter": "AccountOrCardNo",
+      "value": "Account or card number used to process payment."
+    },
+    {
+      "parameter": "PaymentReference",
+      "value": "Payment reference. (applicable for Payment)"
+    },
+    {
+      "parameter": "PreauthReference",
+      "value": "Preauthorization reference. (applicable for Preauthorization)"
+    },
+    {
+      "parameter": "ProcessorReference",
+      "value": "Processor reference."
+    },
+    {
+      "parameter": "PaymentStatus",
+      "value": "Possiible values 0 => (Pending) 1 => (Error) 3 => (Successful) 4 => (Failed) 5 => (Cancelled) 6 => (Suppressed) 7 => (InProgress)"
+    },
+    {
+      "parameter": "PaymentStatusString",
+      "value": "Possiible values Pending Error Successful Failed Cancelled Suppressed InProgress"
+    },
+    {
+      "parameter": "PreauthStatus",
+      "value": "Possiible values 0 => (Pending) 1 => (Error) 3 => (Successful) 4 => (Failed) 5 => (Cancelled) 6 => (Suppressed) 7 => (InProgress)"
+    },
+    {
+      "parameter": "PreauthStatusString",
+      "value": "Possiible values Pending Error Successful Failed Cancelled Suppressed InProgress"
+    },
+    {
+      "parameter": "TransactionSource",
+      "value": "Possiible values36 => (Public_OnlineOneOffPayment)"
+    },
+    {
+      "parameter": "TransactionSourceString",
+      "value": "Possiible values Public_OnlineOneOffPayment"
+    },
+    {
+      "parameter": "ProcessingDate",
+      "value": "The date and time when the payment is processed. format: yyyy-MM-ddTHH:mm:ss"
+    },
+    {
+      "parameter": "SettlementDate",
+      "value": "The date when the payment is settled to the merchant. format: yyyy-MM-dd"
+    },
+    {
+      "parameter": "IsPaymentSettledToMerchant",
+      "value": "Flag to indicate whetehr the funds are settled to the merchant or not."
+    },
+    {
+      "parameter": "BaseAmount",
+      "value": "Same as payment amount."
+    },
+    {
+      "parameter": "CustomerFee",
+      "value": "Fee charged to the the customer to process the payment."
+    },
+    {
+      "parameter": "ProcessedAmount",
+      "value": "Base amount + Customer fee. (applicable for Payment)"
+    },
+    {
+      "parameter": "PreauthAmount",
+      "value": "Base amount + Customer fee. (applicable for Preauthorization)"
+    },
+    {
+      "parameter": "FundsToMerchant",
+      "value": "Base amount - Merchant fee, if applicable."
+    },
+    {
+      "parameter": "MerchantCode",
+      "value": "Merchant code."
+    },
+    {
+      "parameter": "FailureCode",
+      "value": "Populated only when payment is not successful."
+    },
+    {
+      "parameter": "FailureReason",
+      "value": "Populated only when payment is not successful."
+    },
+    {
+      "parameter": "Token",
+      "value": "Returned only if payment is processed using cardProxy input parameter. The value will be same as cardProxy."
+    },
+    {
+      "parameter": "PayId",
+      "value": "Returned only if payment is processed using PayID."
+    },
+    {
+      "parameter": "PayIdName",
+      "value": "Returned only if payment is processed using PayID. Display name for the PayID"
+    }
+  ],
+  "mode1": [],
+  "combined": [
+    {
+      "parameter": "CustomerName",
+      "value": "Same as input parameter."
+    },
+    {
+      "parameter": "CustomerReference",
+      "value": "Same as input parameter."
+    },
+    {
+      "parameter": "MerchantUniquePaymentId",
+      "value": "Same as input parameter."
+    },
+    {
+      "parameter": "AccountOrCardNo",
+      "value": "Account or card number used to process payment."
+    },
+    {
+      "parameter": "PaymentReference",
+      "value": "Payment reference. (applicable for Payment)"
+    },
+    {
+      "parameter": "PreauthReference",
+      "value": "Preauthorization reference. (applicable for Preauthorization)"
+    },
+    {
+      "parameter": "ProcessorReference",
+      "value": "Processor reference."
+    },
+    {
+      "parameter": "PaymentStatus",
+      "value": "Possiible values 0 => (Pending) 1 => (Error) 3 => (Successful) 4 => (Failed) 5 => (Cancelled) 6 => (Suppressed) 7 => (InProgress)"
+    },
+    {
+      "parameter": "PaymentStatusString",
+      "value": "Possiible values Pending Error Successful Failed Cancelled Suppressed InProgress"
+    },
+    {
+      "parameter": "PreauthStatus",
+      "value": "Possiible values 0 => (Pending) 1 => (Error) 3 => (Successful) 4 => (Failed) 5 => (Cancelled) 6 => (Suppressed) 7 => (InProgress)"
+    },
+    {
+      "parameter": "PreauthStatusString",
+      "value": "Possiible values Pending Error Successful Failed Cancelled Suppressed InProgress"
+    },
+    {
+      "parameter": "TransactionSource",
+      "value": "Possiible values36 => (Public_OnlineOneOffPayment)"
+    },
+    {
+      "parameter": "TransactionSourceString",
+      "value": "Possiible values Public_OnlineOneOffPayment"
+    },
+    {
+      "parameter": "ProcessingDate",
+      "value": "The date and time when the payment is processed. format: yyyy-MM-ddTHH:mm:ss"
+    },
+    {
+      "parameter": "SettlementDate",
+      "value": "The date when the payment is settled to the merchant. format: yyyy-MM-dd"
+    },
+    {
+      "parameter": "IsPaymentSettledToMerchant",
+      "value": "Flag to indicate whetehr the funds are settled to the merchant or not."
+    },
+    {
+      "parameter": "BaseAmount",
+      "value": "Same as payment amount."
+    },
+    {
+      "parameter": "CustomerFee",
+      "value": "Fee charged to the the customer to process the payment."
+    },
+    {
+      "parameter": "ProcessedAmount",
+      "value": "Base amount + Customer fee. (applicable for Payment)"
+    },
+    {
+      "parameter": "PreauthAmount",
+      "value": "Base amount + Customer fee. (applicable for Preauthorization)"
+    },
+    {
+      "parameter": "FundsToMerchant",
+      "value": "Base amount - Merchant fee, if applicable."
+    },
+    {
+      "parameter": "MerchantCode",
+      "value": "Merchant code."
+    },
+    {
+      "parameter": "FailureCode",
+      "value": "Populated only when payment is not successful."
+    },
+    {
+      "parameter": "FailureReason",
+      "value": "Populated only when payment is not successful."
+    },
+    {
+      "parameter": "Token",
+      "value": "Returned only if payment is processed using cardProxy input parameter. The value will be same as cardProxy."
+    },
+    {
+      "parameter": "PayId",
+      "value": "Returned only if payment is processed using PayID."
+    },
+    {
+      "parameter": "PayIdName",
+      "value": "Returned only if payment is processed using PayID. Display name for the PayID"
+    }
+  ]
+}

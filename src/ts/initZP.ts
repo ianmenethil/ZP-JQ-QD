@@ -4,10 +4,14 @@
  */
 
 import { parseCodePreviewConfig } from './codePreview.ts';
-import { generatePaymentSecurityFingerprint } from './cryptographicFingerprintGenerator.ts';
-import { showError } from './modal.ts';
-import { saveCredentials, saveState, loadCredentials } from './session.ts';
-import { generateCurrentIsoTimestamp } from './utilities.ts';
+import { generatePaymentSecurityFingerprint } from './core/fingerprintGenerator.ts';
+import { showError } from './modals/modal.ts';
+import {
+    getOriginalCredentialValue,
+    saveCredentials,
+    saveState,
+} from './session.ts';
+// Removed unnecessary import - using new Date().toISOString().slice(0, 19) directly
 
 // Import jQuery only for the zpPayment plugin (required dependency)
 declare const $: any;
@@ -19,7 +23,7 @@ declare const $: any;
 /**
  * ZenPay plugin configuration interface
  */
-export interface ZenPayPluginConfig {
+interface ZenPayPluginConfig {
 	apiKey: string;
 	username: string;
 	password: string;
@@ -57,7 +61,7 @@ export interface ZenPayPluginConfig {
 /**
  * Fingerprint generation parameters interface
  */
-export interface FingerprintParams {
+interface FingerprintParams {
 	apiKey: string;
 	username: string;
 	password: string;
@@ -67,18 +71,18 @@ export interface FingerprintParams {
 	timestamp: string;
 }
 
-/**
- * Session configuration interface extending ZenPayPluginConfig
- */
-export interface SessionConfig extends ZenPayPluginConfig {
-	username: string;
-	password: string;
-}
+// /**
+//  * Session configuration interface extending ZenPayPluginConfig
+//  */
+// export interface SessionConfig extends ZenPayPluginConfig {
+// 	username: string;
+// 	password: string;
+// }
 
 /**
  * ZenPay plugin instance interface
  */
-export interface ZenPayPluginInstance {
+interface ZenPayPluginInstance {
 	options: ZenPayPluginConfig;
 	init(): void;
 }
@@ -86,7 +90,7 @@ export interface ZenPayPluginInstance {
 /**
  * Validation error class for ZenPay initialization
  */
-export class ZenPayValidationError extends Error {
+class ZenPayValidationError extends Error {
 	private readonly _field: string;
 	private readonly _value: unknown;
 
@@ -109,17 +113,17 @@ export class ZenPayValidationError extends Error {
 /**
  * Initialization error class for ZenPay plugin
  */
-export class ZenPayInitializationError extends Error {
-  constructor(message: string, options?: { cause?: Error }) {
-    super(message, options);
-    this.name = "ZenPayInitializationError";
-  }
+class ZenPayInitializationError extends Error {
+	constructor(message: string, options?: { cause?: Error }) {
+		super(message, options);
+		this.name = 'ZenPayInitializationError';
+	}
 }
 
 /**
  * Log payload interface for the onPluginClose event
  */
-export interface LogPayload {
+interface LogPayload {
 	merchantUniquePaymentId: string;
 	event: string;
 	at: string;
@@ -128,7 +132,7 @@ export interface LogPayload {
 /**
  * OnPluginClose callback interface
  */
-export interface OnPluginCloseCallback {
+interface OnPluginCloseCallback {
 	(this: ZenPayPluginInstance): void;
 }
 
@@ -144,11 +148,19 @@ export interface OnPluginCloseCallback {
  */
 function validateCredentials(username: string, password: string): void {
 	if (!username || username.trim().length === 0) {
-		throw new ZenPayValidationError('Username is required for initialization', 'username', username);
+		throw new ZenPayValidationError(
+			'Username is required for initialization',
+			'username',
+			username
+		);
 	}
 
 	if (!password || password.trim().length === 0) {
-		throw new ZenPayValidationError('Password is required for initialization', 'password', password);
+		throw new ZenPayValidationError(
+			'Password is required for initialization',
+			'password',
+			password
+		);
 	}
 }
 
@@ -159,7 +171,11 @@ function validateCredentials(username: string, password: string): void {
  */
 function validateApiKey(apiKey: string): void {
 	if (!apiKey || apiKey === '<<API-KEY>>' || apiKey.trim().length === 0) {
-		throw new ZenPayValidationError('A valid API Key is required for initialization', 'apiKey', apiKey);
+		throw new ZenPayValidationError(
+			'A valid API Key is required for initialization',
+			'apiKey',
+			apiKey
+		);
 	}
 }
 
@@ -170,7 +186,11 @@ function validateApiKey(apiKey: string): void {
  */
 function validateFingerprint(fingerprint: string | null): void {
 	if (!fingerprint || fingerprint.trim().length === 0) {
-		throw new ZenPayValidationError('Failed to generate security fingerprint. Please check API credentials.', 'fingerprint', fingerprint);
+		throw new ZenPayValidationError(
+			'Failed to generate security fingerprint. Please check API credentials.',
+			'fingerprint',
+			fingerprint
+		);
 	}
 }
 
@@ -202,9 +222,12 @@ export async function initializeZenPayPlugin(): Promise<void> {
 		// Parse configuration from code preview
 		const parsedConfig: Partial<ZenPayPluginConfig> = parseCodePreviewConfig();
 
-		// Get credentials from form inputs
-		const username: string = (document.getElementById('usernameInput') as HTMLInputElement)?.value || '';
-		const password: string = (document.getElementById('passwordInput') as HTMLInputElement)?.value || '';
+		// Get credentials from form inputs (using original unobfuscated values)
+		const usernameInput = document.getElementById('usernameInput') as HTMLInputElement;
+		const passwordInput = document.getElementById('passwordInput') as HTMLInputElement;
+
+		const username: string = usernameInput ? getOriginalCredentialValue(usernameInput) : '';
+		const password: string = passwordInput ? getOriginalCredentialValue(passwordInput) : '';
 
 		// Create complete config with required fields
 		const completeConfig: ZenPayPluginConfig = {
@@ -215,16 +238,19 @@ export async function initializeZenPayPlugin(): Promise<void> {
 			paymentAmount: parsedConfig.paymentAmount || 0,
 			mode: parsedConfig.mode || 0,
 			fingerprint: parsedConfig.fingerprint || '',
-			merchantUniquePaymentId: parsedConfig.merchantUniquePaymentId || ''
+			merchantUniquePaymentId: parsedConfig.merchantUniquePaymentId || '',
 		};
-		const paymentAmount: string = completeConfig.paymentAmount.toFixed(2);
+		// Convert normalized payment amount (cents) back to dollars for fingerprint generation
+		// parsedConfig.paymentAmount is already in cents (e.g., 10000 for $100.00)
+		// We need to convert it back to dollars (100.00) for the fingerprint
+		const paymentAmount: string = (completeConfig.paymentAmount / 100).toFixed(2);
 
 		// Validate credentials
 		validateCredentials(username, password);
 		validateApiKey(completeConfig.apiKey);
 
 		// Generate timestamp and fingerprint
-		const timestamp: string = generateCurrentIsoTimestamp();
+		const timestamp: string = new Date().toISOString().slice(0, 19);
 		parsedConfig.timestamp = timestamp;
 
 		const fingerprintParams: FingerprintParams = {
@@ -234,7 +260,7 @@ export async function initializeZenPayPlugin(): Promise<void> {
 			mode: String(completeConfig.mode),
 			paymentAmount: paymentAmount,
 			merchantUniquePaymentId: completeConfig.merchantUniquePaymentId,
-			timestamp: timestamp
+			timestamp: timestamp,
 		};
 
 		const fingerprint: string | null = await generatePaymentSecurityFingerprint(fingerprintParams);
@@ -242,15 +268,22 @@ export async function initializeZenPayPlugin(): Promise<void> {
 
 		parsedConfig.fingerprint = fingerprint;
 
+		// Convert paymentAmount back to dollars (with 2 decimal places) for ZenPay payload
+		// parsedConfig.paymentAmount is in cents (e.g., 10000), ZenPay expects dollars (e.g., 100.00)
+		parsedConfig.paymentAmount = parseFloat(paymentAmount);
+
 		// Set minimum height from UI
-		const minHeightFromUI: string = (document.getElementById('minHeightInput') as HTMLInputElement)?.value?.trim() || '';
+		const minHeightFromUI: string =
+			(document.getElementById('minHeightInput') as HTMLInputElement)?.value?.trim() || '';
 		if (minHeightFromUI) {
 			completeConfig.minHeight = parseInt(minHeightFromUI, 10);
 		}
 
 		// Handle V3 compatibility mode
 		if (window.zpV3CompatMode?.omitMerchantCodeFromPayload) {
-			console.warn('[initializeZenPayPlugin] ⚠️ V3 Compat Mode: Omitting merchantCode from payload');
+			console.warn(
+				'[initializeZenPayPlugin] ⚠️ V3 Compat Mode: Omitting merchantCode from payload'
+			);
 			delete parsedConfig.merchantCode;
 		}
 
@@ -259,42 +292,41 @@ export async function initializeZenPayPlugin(): Promise<void> {
 			delete parsedConfig.timestamp;
 		}
 
-		// Save credentials if not already saved
-		const existingCreds = loadCredentials();
-		if (!existingCreds) {
-			saveCredentials(
-				completeConfig.apiKey,
-				username,
-				password,
-				completeConfig.merchantCode || ''
-			);
-		}
+		// Save credentials when initialize is clicked
+		saveCredentials(completeConfig.apiKey, username, password, completeConfig.merchantCode || '');
 
-		// Save state (payment methods and callbackUrl)
-		const callbackUrl = (document.getElementById('callbackUrlInput') as HTMLInputElement)?.value || '';
+		// Save complete state (payment methods, options, mode, etc.) when initialize is clicked
+		const callbackUrl =
+			(document.getElementById('callbackUrlInput') as HTMLInputElement)?.value || '';
 		saveState(callbackUrl);
+		console.log('[initializeZenPayPlugin] Saved credentials and complete form state to session storage');
 
-		const onPluginCloseLogFunction: OnPluginCloseCallback = function(this: ZenPayPluginInstance): void {
+		const onPluginCloseLogFunction: OnPluginCloseCallback = function (
+			this: ZenPayPluginInstance
+		): void {
 			console.log('[onPluginClose] Plugin closed, sending log via fetch...');
 			const logPayload: LogPayload = {
 				merchantUniquePaymentId: this.options.merchantUniquePaymentId,
 				event: 'pluginClosed',
-				at: new Date().toISOString()
+				at: new Date().toISOString(),
 			};
 			fetch('/api/log', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(logPayload)
-			}).then((response: Response) => {
-				if (!response.ok) {
-					throw new Error(`Network response was not ok: ${response.statusText}`);
-				}
-				return response.json();
-			}).then((data: unknown) => {
-				console.log('[onPluginClose] Log sent successfully:', data);
-			}).catch((error: unknown) => {
-				console.error('[onPluginClose] Error sending log:', error);
-			});
+				body: JSON.stringify(logPayload),
+			})
+				.then((response: Response) => {
+					if (!response.ok) {
+						throw new Error(`Network response was not ok: ${response.statusText}`);
+					}
+					return response.json();
+				})
+				.then((data: unknown) => {
+					console.log('[onPluginClose] Log sent successfully:', data);
+				})
+				.catch((error: unknown) => {
+					console.error('[onPluginClose] Error sending log:', error);
+				});
 		};
 
 		parsedConfig.onPluginClose = onPluginCloseLogFunction;
@@ -309,7 +341,9 @@ export async function initializeZenPayPlugin(): Promise<void> {
 
 		const result = payment.init();
 		if (result === undefined) {
-			throw new ZenPayInitializationError('Plugin initialization returned undefined. Please check the configuration and try again.');
+			throw new ZenPayInitializationError(
+				'Plugin initialization returned undefined. Please check the configuration and try again.'
+			);
 		}
 
 		console.log('[initializeZenPayPlugin] Plugin initialization completed successfully');
@@ -321,9 +355,9 @@ export async function initializeZenPayPlugin(): Promise<void> {
 			throw error;
 		} else {
 			const initError: ZenPayInitializationError = new ZenPayInitializationError(
-                'Unable to initialize plugin. See console for details.',
-                error instanceof Error ? { cause: error } : undefined
-            );
+				'Unable to initialize plugin. See console for details.',
+				error instanceof Error ? { cause: error } : undefined
+			);
 
 			showError('Initialization Error', initError.message);
 			throw initError;

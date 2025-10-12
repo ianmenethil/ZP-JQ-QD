@@ -1,0 +1,7 @@
+[
+  {
+    "index": 1,
+    "language": "javascript",
+    "code": "var payment = $.zpPayment({\r\n    url: 'https://<<PROGRAM SUB-DOMAIN>>.<<PROGRAM DOMAIN>>/online/v5',\r\n    merchantCode: '<<MERCHANT-CODE>>',\r\n    apiKey: '<<API-KEY>>',\r\n    fingerprint: '<<FINGERPRINT>>',\r\n    redirectUrl: '<<Your Redirect URL>>',\r\n    mode: 0,\r\n    displayMode: 0,\r\n    customerName: 'Customer Name',\r\n    customerReference: 'Reference 1',\r\n    paymentAmount: 100.00,\r\n    timeStamp: '<<TIMESTAMP>>'\r\n});\r\nvar result = payment.init();"
+  }
+]

@@ -16,6 +16,7 @@ dev-debug.log
 .idea
 .vscode
 *.suo
+SEP.json.prod.json
 *.ntvs*
 *.njsproj
 *.sln
@@ -73,3 +74,9 @@ sample-option3-compact.html
 sample-option3-developer.html
 src/html/index.html
 src/html/modal.html
+
+# Unused code analysis reports
+unused-code.md
+unused-code.json
+scripts/output/code-usage-report.json
+scripts/output/code-usage-report.md

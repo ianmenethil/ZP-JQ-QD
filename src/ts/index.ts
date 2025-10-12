@@ -9,6 +9,6 @@
 import '../css/styles.css';
 
 // Import TypeScript modules
-import './errorCodes.ts';
 import './main.ts';
+import './modals/errorCodes.ts';
 import './zpLogo.ts';

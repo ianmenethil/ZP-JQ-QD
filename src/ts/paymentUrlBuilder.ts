@@ -1,6 +1,6 @@
 import { updateCodePreview } from './codePreview.ts';
 import { DEFAULT_VALUES, DomUtils, extendedOptions, SESSION_KEYS } from './globals.ts';
-import { getFromSession, saveToSession } from './session.ts';
+import { getFromSession } from './session.ts';
 import { copyTextToClipboard } from './utilities.ts';
 
 // ============================================================================
@@ -10,7 +10,7 @@ import { copyTextToClipboard } from './utilities.ts';
 /**
  * URL builder configuration interface
  */
-export interface PaymentUrlConfiguration {
+interface PaymentUrlConfiguration {
 	readonly subdomain: string;
 	readonly domain: string;
 	readonly version: string;
@@ -19,7 +19,7 @@ export interface PaymentUrlConfiguration {
 /**
  * URL builder error class
  */
-export class PaymentUrlBuilderError extends Error {
+class PaymentUrlBuilderError extends Error {
 	constructor(
 		message: string,
 		public readonly operation: 'build' | 'update' | 'restore',
@@ -48,7 +48,7 @@ export class PaymentUrlBuilderError extends Error {
  * console.log(url); // "https://payuat.travelpay.com.au/online/v5"
  * ```
  */
-export function buildZenPayPaymentUrl(configuration: PaymentUrlConfiguration): string {
+function buildZenPayPaymentUrl(configuration: PaymentUrlConfiguration): string {
 	const { subdomain, domain, version } = configuration;
 	return `https://${subdomain}.${domain}.com.au/online/${version}`;
 }
@@ -105,7 +105,10 @@ export function updateRedirectUrlInForm(): void {
 		);
 
 		// Update form fields
-		DomUtils.setValue('#redirectUrlInput', redirectUrl);
+		const redirectUrlElement = document.querySelector('#redirectUrlInput') as HTMLInputElement;
+		if (redirectUrlElement) {
+			redirectUrlElement.setAttribute('placeholder', redirectUrl);
+		}
 
 		const callbackUrlElement = document.querySelector('#callbackUrlInput') as HTMLInputElement;
 		if (callbackUrlElement) {
@@ -153,13 +156,14 @@ function restoreUrlBuilderConfigurationFromSession(): PaymentUrlConfiguration {
 }
 
 /**
- * Save URL builder configuration to session storage
- * @param configuration - The configuration to save
+ * Save URL builder configuration to session storage - NO LONGER SAVES INDIVIDUALLY
+ * Configuration will be saved only when credentials are loaded or plugin is initialized
+ * @param configuration - The configuration (for future use)
  */
 function saveUrlBuilderConfigurationToSession(configuration: PaymentUrlConfiguration): void {
-	saveToSession(SESSION_KEYS.SUBDOMAIN, configuration.subdomain);
-	saveToSession(SESSION_KEYS.DOMAIN, configuration.domain);
-	saveToSession(SESSION_KEYS.VERSION, configuration.version);
+	// Session storage now happens only on credential load or initialization
+	// This function kept for backward compatibility but does nothing
+	void configuration; // Avoid unused parameter warning
 }
 
 /**
@@ -197,7 +201,7 @@ function applyConfigurationToFormElements(configuration: PaymentUrlConfiguration
 /**
  * Update the URL preview display based on current form values
  */
-export function updatePaymentUrlPreviewDisplay(): void {
+function updatePaymentUrlPreviewDisplay(): void {
 	try {
 		const subdomainInput = document.querySelector(
 			'input[name="subdomain"]:checked'
@@ -364,21 +368,7 @@ function setupUrlBuilderEventListeners(): void {
 /**
  * Initialize modal-specific functionality
  */
-function initializeUrlBuilderModal(): void {
-	// Initialize tooltips when modal is shown
-	const urlBuilderModal = document.getElementById('urlBuilderModal');
-	if (urlBuilderModal) {
-		urlBuilderModal.addEventListener('shown.bs.modal', () => {
-			const tooltipElements = urlBuilderModal.querySelectorAll('[data-bs-toggle="tooltip"]');
-			tooltipElements.forEach((element) => {
-				// Initialize Bootstrap tooltips using native API
-				if ((window as any).bootstrap?.Tooltip) {
-					new (window as any).bootstrap.Tooltip(element);
-				}
-			});
-		});
-	}
-}
+function initializeUrlBuilderModal(): void {}
 
 // ============================================================================
 // MAIN INITIALIZATION FUNCTION

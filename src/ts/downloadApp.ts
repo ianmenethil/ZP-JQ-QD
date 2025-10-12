@@ -6,7 +6,7 @@
 
 import { parseCodePreviewConfig } from './codePreview.ts';
 import { DEFAULT_VALUES, DomUtils } from './globals.ts';
-import { showError } from './modal.ts';
+import { showError, showModal } from './modals/modal.ts';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -15,46 +15,46 @@ import { showError } from './modal.ts';
 /**
  * Download configuration interface
  */
-export interface DownloadConfig {
-    apiKey: string;
-    username: string;
-    password: string;
-    merchantCode: string;
-    gateway: string;
-    mode: string;
-    codeSnippet: string;
+interface DownloadConfig {
+	apiKey: string;
+	username: string;
+	password: string;
+	merchantCode: string;
+	gateway: string;
+	mode: string;
+	codeSnippet: string;
 }
 
 /**
  * Parsed configuration options interface
  */
-export interface ConfigOptions {
-    [key: string]: unknown;
-    paymentAmount?: number;
-    customerName?: string;
-    customerEmail?: string;
-    customerReference?: string;
-    redirectUrl?: string;
-    callbackUrl?: string;
-    merchantUniquePaymentId?: string;
-    contactNumber?: string;
-    minHeight?: number;
-    userMode?: number;
-    overrideFeePayer?: number;
+interface ConfigOptions {
+	[key: string]: unknown;
+	paymentAmount?: number;
+	customerName?: string;
+	customerEmail?: string;
+	customerReference?: string;
+	redirectUrl?: string;
+	callbackUrl?: string;
+	merchantUniquePaymentId?: string;
+	contactNumber?: string;
+	minHeight?: number;
+	userMode?: number;
+	overrideFeePayer?: number;
 }
 
 /**
  * Download error class
  */
-export class DownloadError extends Error {
-    constructor(
-        message: string,
-        public readonly operation: string,
-        public override readonly cause?: Error
-    ) {
-        super(message);
-        this.name = 'DownloadError';
-    }
+class DownloadError extends Error {
+	constructor(
+		message: string,
+		public readonly operation: string,
+		public override readonly cause?: Error
+	) {
+		super(message);
+		this.name = 'DownloadError';
+	}
 }
 
 // ============================================================================
@@ -67,99 +67,63 @@ export class DownloadError extends Error {
  * @param configOptions - Parsed configuration options
  * @returns Generated initialization script
  */
-function generateInitializationScript(config: DownloadConfig, configOptions: ConfigOptions): string {
-    const { apiKey, username, password, merchantCode, mode } = config;
+function generateInitializationScript(
+    config: DownloadConfig,
+    _configOptions: ConfigOptions,
+	inputParams: string,
+	outputParams: string,
+	errorCodes: string
+): string {
+	const { apiKey, username, password, merchantCode } = config;
 
-    // Generate boolean option setters
-    const booleanOptions = Object.entries(configOptions)
-        .filter(([, value]) => typeof value === 'boolean' && value === true)
-        .map(([key]) => `
-    const ${key}Element = document.getElementById('${key}');
-    if (${key}Element) {
-      ${key}Element.checked = true;
-      // Trigger change event to update UI
-      const event = new Event('change', { bubbles: true });
-      ${key}Element.dispatchEvent(event);
-    }`)
-        .join('\n');
-
-    return `
+	return `
 <script>
+// Inline data files to avoid fetch errors
+window.__ZENPAY_DATA__ = {
+  inputParameters: ${inputParams},
+  outputParameters: ${outputParams},
+  errorCodes: ${errorCodes}
+};
+
+// Intercept fetch calls to return inlined data
+const originalFetch = window.fetch;
+window.fetch = function(url, options) {
+  if (url === '/public/jq-input-parameters.json') {
+    return Promise.resolve(new Response(JSON.stringify(window.__ZENPAY_DATA__.inputParameters), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    }));
+  }
+  if (url === '/public/jq-output-parameters.json') {
+    return Promise.resolve(new Response(JSON.stringify(window.__ZENPAY_DATA__.outputParameters), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    }));
+  }
+  if (url === '/public/jq-error-codes.json') {
+    return Promise.resolve(new Response(JSON.stringify(window.__ZENPAY_DATA__.errorCodes), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    }));
+  }
+  return originalFetch.apply(this, arguments);
+};
+
 document.addEventListener('DOMContentLoaded', function() {
-  // Pre-fill credentials
-  const apiKeyInput = document.getElementById('apiKeyInput');
-  if (apiKeyInput) apiKeyInput.value = "${apiKey}";
+  // Pre-fill ONLY credentials (4 fields)
+  const apiKeyField = document.getElementById('apiKeyInput');
+  if (apiKeyField) apiKeyField.value = "${apiKey}";
 
-  const usernameInput = document.getElementById('usernameInput');
-  if (usernameInput) usernameInput.value = "${username}";
+  const usernameField = document.getElementById('usernameInput');
+  if (usernameField) usernameField.value = "${username}";
 
-  const passwordInput = document.getElementById('passwordInput');
-  if (passwordInput) passwordInput.value = "${password}";
+  const passwordField = document.getElementById('passwordInput');
+  if (passwordField) passwordField.value = "${password}";
 
-  const merchantCodeInput = document.getElementById('merchantCodeInput');
-  if (merchantCodeInput) merchantCodeInput.value = "${merchantCode}";
+  const merchantCodeField = document.getElementById('merchantCodeInput');
+  if (merchantCodeField) merchantCodeField.value = "${merchantCode}";
 
-  const paymentAmountInput = document.getElementById('paymentAmountInput');
-  if (paymentAmountInput) paymentAmountInput.value = "${configOptions.paymentAmount || ''}";
-
-  // Set URL
-  const urlPreview = document.getElementById('urlPreview');
-  if (urlPreview) urlPreview.value = "${config.gateway}";
-
-  // Set payment mode
-  const modeSelect = document.getElementById('modeSelect');
-  if (modeSelect) modeSelect.value = "${mode}";
-
-  // Set extended options
-  const customerNameInput = document.getElementById('customerNameInput');
-  if (customerNameInput) customerNameInput.value = "${configOptions.customerName || ''}";
-
-  const customerEmailInput = document.getElementById('customerEmailInput');
-  if (customerEmailInput) customerEmailInput.value = "${configOptions.customerEmail || ''}";
-
-  const customerReferenceInput = document.getElementById('customerReferenceInput');
-  if (customerReferenceInput) customerReferenceInput.value = "${configOptions.customerReference || ''}";
-
-  const redirectUrlInput = document.getElementById('redirectUrlInput');
-  if (redirectUrlInput) redirectUrlInput.value = "${configOptions.redirectUrl || ''}";
-
-  const callbackUrlInput = document.getElementById('callbackUrlInput');
-  if (callbackUrlInput) callbackUrlInput.value = "${configOptions.callbackUrl || ''}";
-
-  const merchantUniquePaymentIdInput = document.getElementById('merchantUniquePaymentIdInput');
-  if (merchantUniquePaymentIdInput) merchantUniquePaymentIdInput.value = "${configOptions.merchantUniquePaymentId || ''}";
-
-  const contactNumberInput = document.getElementById('contactNumberInput');
-  if (contactNumberInput) contactNumberInput.value = "${configOptions.contactNumber || ''}";
-
-  // Set payment method toggles and additional options
-  ${booleanOptions}
-
-  // Set minHeight if it exists
-  const minHeightInput = document.getElementById('minHeightInput');
-  if (minHeightInput && ${configOptions.minHeight || 'false'}) {
-    minHeightInput.value = "${configOptions.minHeight || ''}";
-  }
-
-  // Set userMode radio buttons
-  if (${configOptions.userMode || 'false'}) {
-    const userModeElement = document.querySelector('input[name="userMode"][value="${configOptions.userMode}"]');
-    if (userModeElement) {
-      userModeElement.checked = true;
-      userModeElement.dispatchEvent(new Event('change', { bubbles: true }));
-    }
-  }
-
-  // Set overrideFeePayer radio buttons
-  if (${configOptions.overrideFeePayer || 'false'}) {
-    const feePayerElement = document.querySelector('input[name="overrideFeePayer"][value="${configOptions.overrideFeePayer}"]');
-    if (feePayerElement) {
-      feePayerElement.checked = true;
-      feePayerElement.dispatchEvent(new Event('change', { bubbles: true }));
-    }
-  }
-
-  console.log('ZenPay configuration loaded successfully');
+  console.log('ZenPay standalone configuration loaded successfully');
 });
 </script>`;
 }
@@ -172,92 +136,175 @@ document.addEventListener('DOMContentLoaded', function() {
  * downloadStandaloneDemo();
  * ```
  */
-export function downloadStandaloneDemo(): void {
-    try {
-        // Get current configuration from form inputs
-        const apiKey = DEFAULT_VALUES.credentials.apiKey;
-        const username = DEFAULT_VALUES.credentials.username;
-        const password = DEFAULT_VALUES.credentials.password;
-        const merchantCode = DEFAULT_VALUES.credentials.merchantCode;
-        const gateway = 'https://sandbox.zenpay.com';
-        const mode = 'test';
-        const codeSnippet = '';
+async function downloadStandaloneDemo(): Promise<void> {
+	try {
+		// Get current configuration from form inputs
+		const apiKeyInput = document.getElementById('apiKeyInput') as HTMLInputElement;
+		const usernameInput = document.getElementById('usernameInput') as HTMLInputElement;
+		const passwordInput = document.getElementById('passwordInput') as HTMLInputElement;
+		const merchantCodeInput = document.getElementById('merchantCodeInput') as HTMLInputElement;
+		const urlPreview = document.getElementById('urlPreview') as HTMLInputElement;
+		const modeSelect = document.getElementById('modeSelect') as HTMLSelectElement;
 
-        // Get all config options from code preview
-        const configOptions = parseCodePreviewConfig();
+		const apiKey = apiKeyInput?.value || DEFAULT_VALUES.credentials.apiKey;
+		const username = usernameInput?.value || DEFAULT_VALUES.credentials.username;
+		const password = passwordInput?.value || DEFAULT_VALUES.credentials.password;
+		const merchantCode = merchantCodeInput?.value || DEFAULT_VALUES.credentials.merchantCode;
+		const gateway = urlPreview?.value || 'https://sandbox.zenpay.com';
+		const mode = modeSelect?.value;
+		const codeSnippet = '';
 
-        const config: DownloadConfig = {
-            apiKey,
-            username,
-            password,
-            merchantCode,
-            gateway,
-            mode,
-            codeSnippet
-        };
+		// Get all config options from code preview
+		const configOptions = parseCodePreviewConfig();
 
-        // Fetch the current page HTML
-        fetch(window.location.href)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.text();
-            })
-            .then(html => {
-                // Create a DOM parser to modify the HTML
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
+		const config: DownloadConfig = {
+			apiKey,
+			username,
+			password,
+			merchantCode,
+			gateway,
+			mode,
+			codeSnippet,
+		};
 
-                // Remove the download button
-                const downloadButton = doc.querySelector('#downloadDemoBtn');
-                if (downloadButton) {
-                    downloadButton.remove();
-                }
+		// Show modal to inform user to build first
+		const buildCheck = await fetch('/build/index.html', { method: 'HEAD' }).catch(() => null);
+		if (!buildCheck || !buildCheck.ok) {
+			showModal(
+				'Build Required',
+				'Please run "npm run build" before downloading the standalone demo.',
+				'warning'
+			);
+			return;
+		}
 
-                // Generate and inject initialization script
-                const injectScript = generateInitializationScript(config, configOptions);
+		// Fetch built files (middleware serves them raw without Vite transformation)
+		Promise.all([
+			fetch('/build/index.html').then((r) => {
+				if (!r.ok) throw new Error('Failed to load index.html');
+				return r.text();
+			}),
+			fetch('/build/css/bundle.min.css').then((r) => {
+				if (!r.ok) throw new Error('Failed to load CSS');
+				return r.text();
+			}),
+			fetch('/build/js/bundle.min.js').then((r) => {
+				if (!r.ok) throw new Error('Failed to load JS');
+				return r.text();
+			}),
+			fetch('/public/jq-input-parameters.json')
+				.then((r) => r.text())
+				.catch(() => '[]'),
+			fetch('/public/jq-output-parameters.json')
+				.then((r) => r.text())
+				.catch(() => '{}'),
+			fetch('/public/jq-error-codes.json')
+				.then((r) => r.text())
+				.catch(() => '[]'),
+		])
+			.then(([currentHtml, bundledCSS, bundledJS, inputParams, outputParams, errorCodes]) => {
+				// Generate initialization script
+				const initScript = generateInitializationScript(
+					config,
+					configOptions,
+					inputParams,
+					outputParams,
+					errorCodes
+				);
 
-                // Insert the script right before the closing body tag
-                const bodyCloseIndex = html.lastIndexOf('</body>');
-                if (bodyCloseIndex === -1) {
-                    throw new Error('Could not find </body> tag in HTML');
-                }
+				let modifiedHtml = currentHtml;
 
-                const modifiedHtml = html.substring(0, bodyCloseIndex) + injectScript + html.substring(bodyCloseIndex);
+				// Remove ALL Vite dev server scripts and module references (with any attributes/whitespace)
+				modifiedHtml = modifiedHtml.replace(
+					/<script[^>]*src="[^"]*\/@vite\/client[^"]*"[^>]*><\/script>/gi,
+					''
+				);
+				modifiedHtml = modifiedHtml.replace(
+					/<script[^>]*src="[^"]*\/src\/ts\/index\.ts[^"]*"[^>]*><\/script>/gi,
+					''
+				);
 
-                // Create and trigger the download
-                const blob = new Blob([modifiedHtml], { type: 'text/html' });
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `ZenPay_Tester_${merchantCode || 'Demo'}.html`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(url);
+				// Remove any existing CSS/JS bundle links
+				modifiedHtml = modifiedHtml.replace(
+					/<link[^>]*href="[^"]*\/css\/bundle(?:\.min)?\.css"[^>]*>/gi,
+					''
+				);
+				modifiedHtml = modifiedHtml.replace(
+					/<script[^>]*src="[^"]*\/js\/bundle(?:\.min)?\.js"[^>]*><\/script>/gi,
+					''
+				);
 
-                console.log('[downloadStandaloneDemo] Download completed successfully');
-            })
-            .catch(error => {
-                console.error('[downloadStandaloneDemo] Error preparing download:', error);
-                showError('Download Failed', 'Could not create standalone file.');
-                throw new DownloadError(
-                    'Failed to prepare download',
-                    'downloadStandaloneDemo',
-                    error instanceof Error ? error : undefined
-                );
-            });
+				// Remove favicon reference
+				modifiedHtml = modifiedHtml.replace(
+					/<link[^>]*href="[^"]*favicon[^"]*"[^>]*>/gi,
+					''
+				);
 
-    } catch (error) {
-        console.error('[downloadStandaloneDemo] Error preparing download:', error);
-        showError('Download Failed', 'An error occurred while preparing the download.');
-        throw new DownloadError(
-            'Failed to prepare download',
-            'downloadStandaloneDemo',
-            error instanceof Error ? error : undefined
-        );
-    }
+				// Remove dev mode comments
+				modifiedHtml = modifiedHtml.replace(
+					/<!--\s*Custom CSS is imported via TypeScript[^>]*-->/gi,
+					''
+				);
+
+				// Remove empty lines left by removals
+				modifiedHtml = modifiedHtml.replace(/^\s*[\r\n]/gm, '');
+
+				// Find the closing </head> tag and inject inlined CSS
+				const headCloseIndex = modifiedHtml.indexOf('</head>');
+				if (headCloseIndex !== -1) {
+					modifiedHtml =
+						modifiedHtml.substring(0, headCloseIndex) +
+						`\n<style>\n${bundledCSS}\n</style>\n` +
+						modifiedHtml.substring(headCloseIndex);
+				}
+
+				// Find the closing </body> tag and inject inlined JS and initialization script
+				const bodyCloseIndex = modifiedHtml.lastIndexOf('</body>');
+				if (bodyCloseIndex === -1) {
+					throw new Error('Could not find </body> tag in HTML');
+				}
+
+				modifiedHtml =
+					modifiedHtml.substring(0, bodyCloseIndex) +
+					`\n<script>\n${bundledJS}\n</script>\n` +
+					initScript +
+					'\n' +
+					modifiedHtml.substring(bodyCloseIndex);
+
+				// Create and trigger the download
+				const blob = new Blob([modifiedHtml], { type: 'text/html' });
+				const url = URL.createObjectURL(blob);
+				const link = document.createElement('a');
+				link.href = url;
+				link.download = `ZenPay-Singlefile-${merchantCode || 'Demo'}.html`;
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+				URL.revokeObjectURL(url);
+
+				console.log('[downloadStandaloneDemo] Download completed successfully');
+			})
+			.catch((error) => {
+				console.error('[downloadStandaloneDemo] Error preparing download:', error);
+				showError(
+					'Download Failed',
+					'Could not create standalone file. Please ensure the application is running properly.'
+				);
+				throw new DownloadError(
+					'Failed to prepare download',
+					'downloadStandaloneDemo',
+					error instanceof Error ? error : undefined
+				);
+			});
+	} catch (error) {
+		console.error('[downloadStandaloneDemo] Error preparing download:', error);
+		showError('Download Failed', 'An error occurred while preparing the download.');
+		throw new DownloadError(
+			'Failed to prepare download',
+			'downloadStandaloneDemo',
+			error instanceof Error ? error : undefined
+		);
+	}
 }
 
 /**
@@ -269,34 +316,30 @@ export function downloadStandaloneDemo(): void {
  * ```
  */
 export function initDownloadFunctionality(buttonSelector: string): void {
-    try {
-        const button = document.querySelector(buttonSelector);
-        if (button) {
-            // Remove hidden attribute to make button visible
-            button.removeAttribute('hidden');
+	try {
+		const button = document.querySelector(buttonSelector) as HTMLButtonElement;
+		if (button) {
+			DomUtils.on(buttonSelector, 'click', function () {
+				if (button.disabled) {
+					showError(
+						'Missing Credentials',
+						'Please fill in API Key, Username, Password, and Merchant Code to download the demo.'
+					);
+				} else {
+					downloadStandaloneDemo();
+				}
+			});
 
-            DomUtils.on(buttonSelector, 'click', function () {
-                if (DomUtils.hasClass(buttonSelector, 'btn-disabled')) {
-                    showError(
-                        'Missing Credentials',
-                        'Please fill in API Key, Username, Password, and Merchant Code to download the demo.'
-                    );
-                } else {
-                    downloadStandaloneDemo();
-                }
-            });
-
-            console.log(`[initDownloadFunctionality] Download button initialized: ${buttonSelector}`);
-        } else {
-            console.warn(`[initDownloadFunctionality] Download button not found: ${buttonSelector}`);
-        }
-
-    } catch (error) {
-        console.error('[initDownloadFunctionality] Error initializing download functionality:', error);
-        throw new DownloadError(
-            'Failed to initialize download functionality',
-            'initDownloadFunctionality',
-            error instanceof Error ? error : undefined
-        );
-    }
+			console.log(`[initDownloadFunctionality] Download button initialized: ${buttonSelector}`);
+		} else {
+			console.warn(`[initDownloadFunctionality] Download button not found: ${buttonSelector}`);
+		}
+	} catch (error) {
+		console.error('[initDownloadFunctionality] Error initializing download functionality:', error);
+		throw new DownloadError(
+			'Failed to initialize download functionality',
+			'initDownloadFunctionality',
+			error instanceof Error ? error : undefined
+		);
+	}
 }

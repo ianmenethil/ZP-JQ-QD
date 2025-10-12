@@ -1,0 +1,74 @@
+[
+  {
+    "code": "E01",
+    "description": "Make sure fingerprint and apikey are passed."
+  },
+  {
+    "code": "E02-*",
+    "description": "MerchantUniquePaymentId cannot be empty."
+  },
+  {
+    "code": "E03-*",
+    "description": "The fingerprint should be unique everytime. This can be achieved by using new MerchantUniquePaymentId and current Timestamp everytime the plugin is opened."
+  },
+  {
+    "code": "E04",
+    "description": "Invalid Credentials. Applicable for V1 and V2(V1 and V2 are deprecated)."
+  },
+  {
+    "code": "E05",
+    "description": "Make sure fingerprint and apikey are passed."
+  },
+  {
+    "code": "E06",
+    "description": "Account is not active. Contact administrator."
+  },
+  {
+    "code": "E07",
+    "description": "Provided endpoint is not supported."
+  },
+  {
+    "code": "E08",
+    "description": "Invalid Credentials. Make sure fingerprint is correctly generated, refer to fingerprint generation logic."
+  },
+  {
+    "code": "E09",
+    "description": "Security violation. Close and open the plugin with fresh fingerprint."
+  },
+  {
+    "code": "E10",
+    "description": "Security violation. Close and open the plugin with fresh fingerprint."
+  },
+  {
+    "code": "E11",
+    "description": "Timestamp cannot be empty. Make sure to pass same timestamp as in generated fingerprint."
+  },
+  {
+    "code": "E13",
+    "description": "MerchantCode provided does not match with the provided credentials."
+  },
+  {
+    "code": "E14",
+    "description": "Security violation. Close and open the plugin with fresh fingerprint."
+  },
+  {
+    "code": "E15",
+    "description": "MerchantCode cannot be empty(V4 onwards)."
+  },
+  {
+    "code": "E16",
+    "description": "Version can not be empty."
+  },
+  {
+    "code": "E17",
+    "description": "CustomerEmail can not be empty(V4 onwards)."
+  },
+  {
+    "code": "E18",
+    "description": "DepartureDate is required for Slice Pay."
+  },
+  {
+    "code": "E19",
+    "description": "Invalid Timestamp. Timestamp needs to be in UTC ISO 8601 format."
+  }
+]

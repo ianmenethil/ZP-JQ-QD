@@ -1,31 +1,15 @@
-/* ============================================================================
- * Public API Quick Reference (1-liners)
- * ============================================================================
- * Types
- * - PlaceholderState: derived flags for a control (hasValue, hasFocus, originalPlaceholder).
- * - PlaceholderError: domain error for placeholder init/enhancement/styling/cleanup.
- *
- * Constants
- * - CREDENTIAL_FIELD_SELECTORS: default small set of credential inputs.
- * - EXTENDED_INPUT_SELECTORS: broader set of inputs for enhancement.
- * - FORM_FLOATING_SELECTOR: selector for Bootstrap .form-floating inputs/textareas with placeholders.
- *
- * Functions
- * - initPlaceholder(selectors?): store & restore original placeholder on target inputs.
- * - enhancePlaceholderConsistency(selectors?): sync placeholder attr/classes with value/focus (events).
- * - setupPlaceholderStyling(selector?): add/remove classes to style placeholder-as-value in .form-floating.
- * - initPlaceholders(config?): run full initialization + document-level listeners for dynamic updates.
- * - cleanupPlaceholders(selectors?): remove listeners, classes, and document-level hooks.
- * ============================================================================
- */
-
 /**
  * Placeholder utilities (modern, strict, minimal side effects limited to DOM)
  */
 
-import { generatePaymentIdentifiers, generateRandomPaymentAmount } from './utilities.ts';
+import {
+	generateRandomContactNumber,
+	generateRandomCustomerName,
+	generateRandomPaymentAmount,
+	generateZenPayEmailAddress,
+} from './utilities.ts';
 
-export interface PlaceholderState {
+interface PlaceholderState {
 	hasValue: boolean;
 	hasFocus: boolean;
 	originalPlaceholder: string;
@@ -34,7 +18,7 @@ export interface PlaceholderState {
 /**
  * Placeholder management error class
  */
-export class PlaceholderError extends Error {
+class PlaceholderError extends Error {
 	constructor(
 		message: string,
 		public readonly selector?: string,
@@ -63,6 +47,7 @@ export const FIELD_IDS = {
 	MERCHANT_PAYMENT_ID: '#merchantUniquePaymentIdInput',
 	ADDITIONAL_REFERENCE: '#additionalReferenceInput',
 	MIN_HEIGHT: '#minHeightInput',
+	DEPARTURE_DATE: '#departureDateInput',
 } as const;
 
 /**
@@ -79,7 +64,7 @@ const FORM_FLOATING_SELECTOR =
 /**
  * CSS class constants
  */
-export const CSS_CLASSES = {
+const CSS_CLASSES = {
 	HAS_PLACEHOLDER: 'has-placeholder',
 	PLACEHOLDER_AS_VALUE: 'placeholder-as-value',
 } as const;
@@ -87,7 +72,7 @@ export const CSS_CLASSES = {
 /**
  * Data attribute constants
  */
-export const DATA_ATTRIBUTES = {
+const DATA_ATTRIBUTES = {
 	ORIGINAL_PLACEHOLDER: 'originalPlaceholder',
 } as const;
 
@@ -189,7 +174,7 @@ function setupInputEventListeners(
 }
 
 // Document-level handler registry (module-scoped)
-let documentHandlerRef: EventListener | null = null;
+// let documentHandlerRef: EventListener | null = null;
 
 // ============================================================================
 // MAIN PLACEHOLDER FUNCTIONS
@@ -222,9 +207,7 @@ export function initPlaceholder(selectors: readonly string[] = FORM_FIELD_SELECT
 /**
  * Enhanced placeholder handling for consistent styling across inputs
  */
-export function enhancePlaceholderConsistency(
-	selectors: readonly string[] = FORM_FIELD_SELECTORS
-): void {
+/* function enhancePlaceholderConsistency(selectors: readonly string[] = FORM_FIELD_SELECTORS): void {
 	try {
 		const selectorString = selectors.join(', ');
 		const elements = document.querySelectorAll(selectorString);
@@ -242,7 +225,7 @@ export function enhancePlaceholderConsistency(
 			error instanceof Error ? error : undefined
 		);
 	}
-}
+} */
 
 /**
  * Setup placeholder styling for form floating inputs/textareas
@@ -264,154 +247,198 @@ export function setupPlaceholderStyling(selector: string = FORM_FLOATING_SELECTO
 	}
 }
 
+// /**
+//  * Initialize all placeholder functionality with comprehensive setup
+//  */
+// export function initPlaceholders(config?: {
+// 	formSelectors?: readonly string[];
+// 	formFloatingSelector?: string;
+// }): void {
+// 	try {
+// 		const { formSelectors = FORM_FIELD_SELECTORS, formFloatingSelector = FORM_FLOATING_SELECTOR } =
+// 			config ?? {};
+
+// 		initPlaceholder(formSelectors);
+// 		enhancePlaceholderConsistency(formSelectors);
+// 		setupPlaceholderStyling(formFloatingSelector);
+
+// 		// (Re)bind document-level listeners for dynamic content
+// 		if (documentHandlerRef) {
+// 			document.removeEventListener('valueLoaded', documentHandlerRef);
+// 			document.removeEventListener('formReset', documentHandlerRef);
+// 			documentHandlerRef = null;
+// 		}
+
+// 		documentHandlerRef = () => {
+// 			setupPlaceholderStyling(formFloatingSelector);
+// 		};
+
+// 		document.addEventListener('valueLoaded', documentHandlerRef);
+// 		document.addEventListener('formReset', documentHandlerRef);
+// 	} catch (error) {
+// 		throw new PlaceholderError(
+// 			'Failed to initialize comprehensive placeholder functionality',
+// 			undefined,
+// 			error instanceof Error ? error : undefined
+// 		);
+// 	}
+// }
+
+// /**
+//  * Remove all placeholder event listeners and reset state
+//  */
+// export function cleanupPlaceholders(selectors: readonly string[] = FORM_FIELD_SELECTORS): void {
+// 	try {
+// 		const selectorString = selectors.join(', ');
+// 		const elements = document.querySelectorAll(selectorString);
+// 		elements.forEach((el) => {
+// 			if (!isTextControl(el)) return;
+
+// 			const handler = handlerMap.get(el);
+// 			if (handler) {
+// 				el.removeEventListener('input', handler);
+// 				el.removeEventListener('change', handler);
+// 				el.removeEventListener('blur', handler);
+// 				handlerMap.delete(el);
+// 			}
+
+// 			const focusHandler = focusHandlerMap.get(el);
+// 			if (focusHandler) {
+// 				el.removeEventListener('focus', focusHandler);
+// 				focusHandlerMap.delete(el);
+// 			}
+
+// 			// Reset classes
+// 			el.classList.remove(CSS_CLASSES.HAS_PLACEHOLDER, CSS_CLASSES.PLACEHOLDER_AS_VALUE);
+// 		});
+
+// 		// Remove document-level listeners
+// 		if (documentHandlerRef) {
+// 			document.removeEventListener('valueLoaded', documentHandlerRef);
+// 			document.removeEventListener('formReset', documentHandlerRef);
+// 			documentHandlerRef = null;
+// 		}
+// 	} catch (error) {
+// 		throw new PlaceholderError(
+// 			'Failed during placeholder cleanup',
+// 			selectors.join(', '),
+// 			error instanceof Error ? error : undefined
+// 		);
+// 	}
+// }
+
+// /**
+//  * Generate a random payment amount and set it in the form
+//  * @param minimumAmount - Minimum payment amount (default: 10.00)
+//  * @param maximumAmount - Maximum payment amount (default: 1000.00)
+//  * @returns The generated payment amount as a formatted string
+//  */
+// export function generateRandomPaymentAmountForForm(
+// 	minimumAmount: number = 10.0,
+// 	maximumAmount: number = 999999.99
+// ): string {
+// 	try {
+// 		const formattedAmount = generateRandomPaymentAmount(minimumAmount, maximumAmount);
+
+// 		const paymentAmountInput = document.querySelector(FIELD_IDS.PAYMENT_AMOUNT) as HTMLInputElement;
+// 		if (paymentAmountInput) {
+// 			paymentAmountInput.value = formattedAmount;
+// 		}
+
+// 		return formattedAmount;
+// 	} catch (error) {
+// 		throw new PlaceholderError(
+// 			'Failed to generate random payment amount for form',
+// 			'#paymentAmountInput',
+// 			error instanceof Error ? error : undefined
+// 		);
+// 	}
+// }
+
+// /**
+//  * Generate new UUIDs for customer reference and merchant unique payment ID (without populating form fields)
+//  * @returns Object containing the generated identifiers
+//  */
+// export function generatePaymentIdentifiers(): {
+// 	customerReferenceIdentifier: string;
+// 	merchantUniquePaymentIdentifier: string;
+// } {
+// 	try {
+// 		const customerReferenceIdentifier = crypto.randomUUID();
+// 		const merchantUniquePaymentIdentifier = crypto.randomUUID();
+
+// 		console.log(`[generatePaymentIdentifiers] Generated identifiers:`, {
+// 			customerReference: customerReferenceIdentifier,
+// 			merchantUniquePaymentId: merchantUniquePaymentIdentifier,
+// 		});
+
+// 		return {
+// 			customerReferenceIdentifier,
+// 			merchantUniquePaymentIdentifier,
+// 		};
+// 	} catch (error) {
+// 		throw new PlaceholderError(
+// 			'Failed to generate payment identifiers',
+// 			'generatePaymentIdentifiers',
+// 			error instanceof Error ? error : undefined
+// 		);
+// 	}
+// }
+
 /**
- * Initialize all placeholder functionality with comprehensive setup
+ * Initialize auto-generated placeholders for all relevant fields
+ * This sets random values as placeholders that will be used if the user doesn't fill them in
  */
-export function initPlaceholders(config?: {
-	formSelectors?: readonly string[];
-	formFloatingSelector?: string;
-}): void {
+export function initAutoGeneratedPlaceholders(): void {
 	try {
-		const { formSelectors = FORM_FIELD_SELECTORS, formFloatingSelector = FORM_FLOATING_SELECTOR } =
-			config ?? {};
-
-		initPlaceholder(formSelectors);
-		enhancePlaceholderConsistency(formSelectors);
-		setupPlaceholderStyling(formFloatingSelector);
-
-		// (Re)bind document-level listeners for dynamic content
-		if (documentHandlerRef) {
-			document.removeEventListener('valueLoaded', documentHandlerRef);
-			document.removeEventListener('formReset', documentHandlerRef);
-			documentHandlerRef = null;
+		// Payment Amount
+		const paymentAmountInput = document.getElementById('paymentAmountInput') as HTMLInputElement;
+		if (paymentAmountInput && !paymentAmountInput.value) {
+			paymentAmountInput.placeholder = generateRandomPaymentAmount(10.0, 1000.0);
 		}
 
-		documentHandlerRef = () => {
-			setupPlaceholderStyling(formFloatingSelector);
-		};
-
-		document.addEventListener('valueLoaded', documentHandlerRef);
-		document.addEventListener('formReset', documentHandlerRef);
-	} catch (error) {
-		throw new PlaceholderError(
-			'Failed to initialize comprehensive placeholder functionality',
-			undefined,
-			error instanceof Error ? error : undefined
-		);
-	}
-}
-
-/**
- * Remove all placeholder event listeners and reset state
- */
-export function cleanupPlaceholders(selectors: readonly string[] = FORM_FIELD_SELECTORS): void {
-	try {
-		const selectorString = selectors.join(', ');
-		const elements = document.querySelectorAll(selectorString);
-		elements.forEach((el) => {
-			if (!isTextControl(el)) return;
-
-			const handler = handlerMap.get(el);
-			if (handler) {
-				el.removeEventListener('input', handler);
-				el.removeEventListener('change', handler);
-				el.removeEventListener('blur', handler);
-				handlerMap.delete(el);
-			}
-
-			const focusHandler = focusHandlerMap.get(el);
-			if (focusHandler) {
-				el.removeEventListener('focus', focusHandler);
-				focusHandlerMap.delete(el);
-			}
-
-			// Reset classes
-			el.classList.remove(CSS_CLASSES.HAS_PLACEHOLDER, CSS_CLASSES.PLACEHOLDER_AS_VALUE);
-		});
-
-		// Remove document-level listeners
-		if (documentHandlerRef) {
-			document.removeEventListener('valueLoaded', documentHandlerRef);
-			document.removeEventListener('formReset', documentHandlerRef);
-			documentHandlerRef = null;
-		}
-	} catch (error) {
-		throw new PlaceholderError(
-			'Failed during placeholder cleanup',
-			selectors.join(', '),
-			error instanceof Error ? error : undefined
-		);
-	}
-}
-
-/**
- * Generate a random payment amount and set it in the form
- * @param minimumAmount - Minimum payment amount (default: 10.00)
- * @param maximumAmount - Maximum payment amount (default: 1000.00)
- * @returns The generated payment amount as a formatted string
- */
-export function generateRandomPaymentAmountForForm(
-	minimumAmount: number = 10.0,
-	maximumAmount: number = 999999.99
-): string {
-	try {
-		const formattedAmount = generateRandomPaymentAmount(minimumAmount, maximumAmount);
-
-		const paymentAmountInput = document.querySelector(FIELD_IDS.PAYMENT_AMOUNT) as HTMLInputElement;
-		if (paymentAmountInput) {
-			paymentAmountInput.value = formattedAmount;
-		}
-
-		return formattedAmount;
-	} catch (error) {
-		throw new PlaceholderError(
-			'Failed to generate random payment amount for form',
-			'#paymentAmountInput',
-			error instanceof Error ? error : undefined
-		);
-	}
-}
-
-/**
- * Generate new UUIDs for customer reference and merchant unique payment ID and populate the form fields
- * @returns Object containing the generated identifiers
- */
-export function generateAndPopulatePaymentIdentifiersInForm(): {
-	customerReferenceIdentifier: string;
-	merchantUniquePaymentIdentifier: string;
-} {
-	try {
-		const { customerReferenceIdentifier, merchantUniquePaymentIdentifier } =
-			generatePaymentIdentifiers();
-
-		const customerReferenceInput = document.querySelector(
-			FIELD_IDS.CUSTOMER_REFERENCE
+		// Merchant Unique Payment ID
+		const merchantPaymentIdInput = document.getElementById(
+			'merchantUniquePaymentIdInput'
 		) as HTMLInputElement;
-		if (customerReferenceInput) {
-			customerReferenceInput.value = customerReferenceIdentifier;
+		if (merchantPaymentIdInput && !merchantPaymentIdInput.value) {
+			merchantPaymentIdInput.placeholder = crypto.randomUUID();
 		}
 
-		const merchantUniquePaymentIdInput = document.querySelector(
-			FIELD_IDS.MERCHANT_PAYMENT_ID
+		// Customer Reference
+		const customerRefInput = document.getElementById('customerReferenceInput') as HTMLInputElement;
+		if (customerRefInput && !customerRefInput.value) {
+			customerRefInput.placeholder = crypto.randomUUID();
+		}
+
+		// Customer Name and Email
+		const customerNameInput = document.getElementById('customerNameInput') as HTMLInputElement;
+		const customerEmailInput = document.getElementById('customerEmailInput') as HTMLInputElement;
+		if (customerNameInput && !customerNameInput.value) {
+			const nameData = generateRandomCustomerName();
+			customerNameInput.placeholder = nameData.fullName;
+
+			if (customerEmailInput && !customerEmailInput.value) {
+				customerEmailInput.placeholder = generateZenPayEmailAddress(nameData.firstName);
+			}
+		}
+
+		// Contact Number
+		const contactNumberInput = document.getElementById('contactNumberInput') as HTMLInputElement;
+		if (contactNumberInput && !contactNumberInput.value) {
+			contactNumberInput.placeholder = generateRandomContactNumber();
+		}
+
+		// Additional Reference
+		const additionalRefInput = document.getElementById(
+			'additionalReferenceInput'
 		) as HTMLInputElement;
-		if (merchantUniquePaymentIdInput) {
-			merchantUniquePaymentIdInput.value = merchantUniquePaymentIdentifier;
+		if (additionalRefInput && !additionalRefInput.value) {
+			additionalRefInput.placeholder = crypto.randomUUID();
 		}
 
-		console.log(`[generateAndPopulatePaymentIdentifiersInForm] Generated identifiers:`, {
-			customerReference: customerReferenceIdentifier,
-			merchantUniquePaymentId: merchantUniquePaymentIdentifier,
-		});
-
-		return {
-			customerReferenceIdentifier,
-			merchantUniquePaymentIdentifier,
-		};
+		console.log('[initAutoGeneratedPlaceholders] Auto-generated placeholders initialized');
 	} catch (error) {
-		throw new PlaceholderError(
-			'Failed to generate and populate payment identifiers',
-			'#customerReferenceInput, #merchantUniquePaymentIdInput',
-			error instanceof Error ? error : undefined
-		);
+		console.error('[initAutoGeneratedPlaceholders] Error initializing placeholders:', error);
 	}
 }

@@ -1,29 +1,19 @@
 <section class="card" id="configCard">
 	<div class="card-hd d-flex justify-content-between align-items-center">
-		<h2 class="mb-0">Plugin Configuration</h2>
-		<div class="d-flex gap-2">
+		<h2 class="mb-0">
+			<i class="bi bi-gear me-2"></i>
+			Plugin Configuration
+		</h2>
+		<div class="btn-group" role="group" style="visibility: hidden">
 			<button
-				class="browse-btn-icon"
-				id="quickActionsBtn"
-				aria-label="Quick actions"
-				data-bs-toggle="popover"
-				data-bs-placement="bottom"
-				data-bs-trigger="click"
-				data-bs-html="true"
-				data-bs-title="Quick Actions"
-				data-bs-content="<div class='list-group'><a href='#' class='list-group-item list-group-item-action'><i class='bi bi-file-earmark-plus me-2'></i>New Configuration</a><a href='#' class='list-group-item list-group-item-action'><i class='bi bi-save me-2'></i>Save Current</a><a href='#' class='list-group-item list-group-item-action'><i class='bi bi-arrow-clockwise me-2'></i>Reset to Default</a></div>"
-			>
-				<i class="bi bi-three-dots-vertical"></i>
-			</button>
-			<button
-				class="browse-btn-icon"
-				id="browseConfigBtn"
-				title="Browse Configuration"
-				aria-label="Browse configuration"
+				class="copy-btn-icon"
+				id="copyConfigBtn"
+				title="Copy Configuration to Clipboard"
+				aria-label="Copy configuration"
 				data-bs-toggle="tooltip"
-				data-bs-placement="top"
+				disabled
 			>
-				<i class="bi bi-folder2-open"></i>
+				<i class="bi bi-clipboard"></i>
 			</button>
 		</div>
 	</div>
@@ -31,7 +21,7 @@
 	<div class="card-bd">
 		<!-- API Endpoint -->
 		<label class="form-label">API Endpoint</label>
-		<div class="position-relative mb-3">
+		<div class="position-relative mb-2">
 			<input
 				type="text"
 				class="form-control pe-5"
@@ -50,32 +40,74 @@
 			</button>
 		</div>
 
-		<!-- Payment Mode -->
-		<label class="form-label">Payment Mode</label>
-		<div class="input-group mb-3">
-			<span
-				class="input-group-text"
-				data-bs-toggle="tooltip"
-				data-bs-placement="top"
-				title="Parameter `#mode`"
-				><i class="bi bi-gear-fill"></i
-			></span>
-			<select class="form-select border-start-0" id="modeSelect">
-				<option value="0">Payment Mode (0)</option>
-				<option value="1">Tokenization Mode (1)</option>
-				<option value="2">Custom Payment Mode (2)</option>
-				<option value="3">PreAuth Mode (3)</option>
-			</select>
-			<button
-				class="btn btn-outline-secondary payment-mode-info"
-				type="button"
-				data-bs-toggle="tooltip"
-				data-bs-placement="top"
-				title="Select the payment processing mode"
-			>
-				<i class="bi bi-info-circle"></i>
-			</button>
+		<!-- Row: Display Mode (50%) | Payment Mode (50%) -->
+		<div class="row mb-2">
+			<!-- Display Mode (Left 50%) -->
+			<div class="col-md-6">
+				<label class="form-label">Display Mode</label>
+				<div style="position: relative">
+					<!-- Modern Dropdown Trigger Button -->
+					<button
+						type="button"
+						class="form-control text-start d-flex justify-content-between align-items-center"
+						id="displayModeButton"
+						style="background: var(--card); border: 1px solid var(--muted); cursor: pointer"
+					>
+						<span data-dropdown-text>Standard Modal (jQuery)</span>
+						<i class="bi bi-chevron-down"></i>
+					</button>
+
+					<!-- Hidden radio inputs for form submission -->
+					<input
+						type="radio"
+						name="displayMode"
+						id="selectDisplayModeModal"
+						value="0"
+						checked
+						style="display: none"
+					/>
+					<input
+						type="radio"
+						name="displayMode"
+						id="selectDisplayModeRedirect"
+						value="1"
+						style="display: none"
+					/>
+
+					<!-- Core Dropdown Container -->
+					<div id="displayModeDropdown"></div>
+				</div>
+			</div>
+
+			<!-- Payment Mode (Right 50%) -->
+			<div class="col-md-6">
+				<label class="form-label">Payment Mode</label>
+				<div style="position: relative">
+					<!-- Modern Dropdown Trigger Button -->
+					<button
+						type="button"
+						class="form-control text-start d-flex justify-content-between align-items-center"
+						id="paymentModeButton"
+						style="background: var(--card); border: 1px solid var(--muted); cursor: pointer"
+					>
+						<span data-dropdown-text>Make Payment</span>
+						<i class="bi bi-chevron-down"></i>
+					</button>
+
+					<!-- Hidden select for backward compatibility -->
+					<select id="modeSelect" style="display: none">
+						<option value="0" selected>0 - Make Payment (Process immediate payment)</option>
+						<option value="1">1 - Tokenise (Save card details for future use)</option>
+						<option value="2">2 - Custom Payment (Make payment with custom parameters)</option>
+						<option value="3">3 - Preauthorization (Reserve funds, capture later)</option>
+					</select>
+
+					<!-- Core Dropdown Container -->
+					<div id="paymentModeDropdown"></div>
+				</div>
+			</div>
 		</div>
-		@@include('main.partials/tab.credentials.html')
+
+		@@include('main.partials/tab.credentials.html') @@include('main.partials/end.html')
 	</div>
 </section>

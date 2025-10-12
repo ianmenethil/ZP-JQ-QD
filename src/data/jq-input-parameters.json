@@ -1,0 +1,278 @@
+[
+  {
+    "name": "url",
+    "type": "string",
+    "conditional": "Required",
+    "remarks": "Plugin access url. We strongly recommend v5 integration."
+  },
+  {
+    "name": "merchantCode",
+    "type": "string",
+    "conditional": "Required",
+    "remarks": "As provided by Zenith."
+  },
+  {
+    "name": "apiKey",
+    "type": "string",
+    "conditional": "Required",
+    "remarks": "As provided by Zenith"
+  },
+  {
+    "name": "fingerprint",
+    "type": "string",
+    "conditional": "Required",
+    "remarks": "The Fingerprint is a SHA3-512 (v5), SHA512 (v4) or SHA1 hash (v3) of the fields in the following order with a pipe (|) as a separator. Credentials provided by Zenith Payments are case sensitive. apiKey|userName|password|mode|paymentAmount|merchantUniquePaymentId|timestamp apiKey: refer apiKey parameter userName: provided by Zenith Payments password: provided by Zenith Payments mode: refer mode parameter paymentAmount: provide payment amount in cents without symbol. e.g. for $150.53 pass 15053. Pass 0 when mode is 2. merchantUniquePaymentId: refer merchantUniquePaymentId parameter timestamp: : provide current datetime in UTC ISO 8601 format as timestamp. format: yyyy-MM-ddTHH:mm:ss SHA3-512 (applicable for v5) - To generate fingerprint for this page you can use online SHA3-512 generator>. SHA512 (applicable for v4) - To generate fingerprint for this page you can use online SHA512 generator. SHA1 (applicable for v3) - To generate fingerprint for this page you can use online SHA1 generator. For methods of generating a SHA1 hash (applicable for v3) in your language refer this web site."
+  },
+  {
+    "name": "redirectUrl",
+    "type": "string",
+    "conditional": "Required",
+    "remarks": "The page will redirect to this URL with the result in the query string. Refer the return parameters section below."
+  },
+  {
+    "name": "mode",
+    "type": "int",
+    "conditional": "Optional",
+    "remarks": "Must be one of the following three values 0 - Make Payment 1 - Tokenise 2 - Custom Payment 3 - Preauthorization Defaults to 0 if not provided."
+  },
+  {
+    "name": "displayMode",
+    "type": "int",
+    "conditional": "Optional",
+    "remarks": "Must be one of the following two values 0 - Default (Modal) 1 - Redirect Url Defaults to 0 if not provided. *Google Pay and Apple Pay works if Modal or Redirect Url with iframe is used."
+  },
+  {
+    "name": "customerName",
+    "type": "string",
+    "conditional": "Conditional",
+    "remarks": "Required if mode is set to 0 or 2."
+  },
+  {
+    "name": "CustomerNameLabel",
+    "type": "string",
+    "conditional": "Optional",
+    "remarks": "Custom label to override default customer name display text"
+  },
+  {
+    "name": "customerReference",
+    "type": "string",
+    "conditional": "Conditional",
+    "remarks": "Required if mode is set to 0 or 2."
+  },
+  {
+    "name": "CustomerReferenceLabel",
+    "type": "string",
+    "conditional": "Optional",
+    "remarks": "Custom label to override default customer reference display text"
+  },
+  {
+    "name": "paymentAmount",
+    "type": "number",
+    "conditional": "Conditional",
+    "remarks": "Required if mode is set to 0 or 2. Returns applicable fee if provided with mode 1."
+  },
+  {
+    "name": "PaymentAmountLabel",
+    "type": "string",
+    "conditional": "Optional",
+    "remarks": "Custom label to override default payment amount display text"
+  },
+  {
+    "name": "allowBankAcOneOffPayment",
+    "type": "boolean(true/false)",
+    "conditional": "Conditional",
+    "remarks": "Required if mode is set to 0 or 2. Show bank account option only if the option is enable for the merchant. Default is false."
+  },
+  {
+    "name": "allowPayToOneOffPayment",
+    "type": "boolean(true/false)",
+    "conditional": "Conditional",
+    "remarks": "Required if mode is set to 0 or 2. Show PayTo bank account option only if the option is enable for the merchant. Default is false."
+  },
+  {
+    "name": "allowPayIdOneOffPayment",
+    "type": "boolean(true/false)",
+    "conditional": "Conditional",
+    "remarks": "Required if mode is set to 0 or 2. Show PayID option only if the option is enable for the merchant. Default is false."
+  },
+  {
+    "name": "allowApplePayOneOffPayment",
+    "type": "boolean(true/false)",
+    "conditional": "Conditional",
+    "remarks": "Conditional if mode is set to 0. Show Apple Pay option only if the option is enable for the merchant. Default is false."
+  },
+  {
+    "name": "allowGooglePayOneOffPayment",
+    "type": "boolean(true/false)",
+    "conditional": "Conditional",
+    "remarks": "Conditional if mode is set to 0. Show Google Pay option only if the option is enable for the merchant. Default is false."
+  },
+  {
+    "name": "allowLatitudePayOneOffPayment",
+    "type": "boolean(true/false)",
+    "conditional": "Conditional",
+    "remarks": "Conditional if mode is set to 0. Show Latitude Pay option only if the option is enable for the merchant. Default is false."
+  },
+  {
+    "name": "allowSlicePayOneOffPayment",
+    "type": "boolean(true/false)",
+    "conditional": "Conditional",
+    "remarks": "Conditional if mode is set to 0. Show Slice Pay option only if the option is enable for the merchant. Default is false."
+  },
+  {
+    "name": "allowUnionPayOneOffPayment",
+    "type": "boolean(true/false)",
+    "conditional": "Conditional",
+    "remarks": "Conditional if mode is set to 0. Show UnionPay option only if the option is enable for the merchant. Default is false."
+  },
+  {
+    "name": "showFeeOnTokenising",
+    "type": "boolean(true/false)",
+    "conditional": "Conditional",
+    "remarks": "Required if mode is set to 1. Show the applicable fees for the token at the end of the process. Default is false."
+  },
+  {
+    "name": "showFailedPaymentFeeOnTokenising",
+    "type": "boolean(true/false)",
+    "conditional": "Conditional",
+    "remarks": "Optional if mode is set to 1. Show the applicable failed payment fees for the token at the end of the process. Default is false."
+  },
+  {
+    "name": "merchantUniquePaymentId",
+    "type": "string",
+    "conditional": "Required",
+    "remarks": "Payment id provided by the merchant. Must be unique and can not be reused if a transaction is processed using this id."
+  },
+  {
+    "name": "timestamp",
+    "type": "string",
+    "conditional": "Conditional",
+    "remarks": "timestamp is required for v4 and optional for v3. Provide current datetime in UTC ISO 8601 format as timestamp. format: yyyy-MM-ddTHH:mm:ss"
+  },
+  {
+    "name": "cardProxy",
+    "type": "string",
+    "conditional": "Optional",
+    "remarks": "Use this parameter to make a payment using a card proxy which is generated using mode '1'."
+  },
+  {
+    "name": "callbackUrl",
+    "type": "string",
+    "conditional": "Optional",
+    "remarks": "The URL will be called with HTTP POST method to submit the result. Refer the return parameters section below."
+  },
+  {
+    "name": "hideTermsAndConditions",
+    "type": "boolean(true/false)",
+    "conditional": "Optional",
+    "remarks": "This will hide the Terms and Conditions. Defaults to 'false' if not provided."
+  },
+  {
+    "name": "sendConfirmationEmailToMerchant",
+    "type": "boolean(true/false)",
+    "conditional": "Optional",
+    "remarks": "This will send confirmation email to merchant. Defaults to 'false' if not provided."
+  },
+  {
+    "name": "additionalReference",
+    "type": "string",
+    "conditional": "Optional",
+    "remarks": "Additional reference to identify customer. This will be passed on to the merchant reconciliation file (PDF & CSV)"
+  },
+  {
+    "name": "contactNumber",
+    "type": "string",
+    "conditional": "Optional",
+    "remarks": "Contact number"
+  },
+  {
+    "name": "customerEmail",
+    "type": "string",
+    "conditional": "Conditional",
+    "remarks": "Email address to which invoice will be emailed if the merchant is configured. It is mandatory in V4."
+  },
+  {
+    "name": "",
+    "type": "string",
+    "conditional": "Optional",
+    "remarks": "Australian Business Number. Used for reward programs if the Program is enabled to provide reward points."
+  },
+  {
+    "name": "companyName",
+    "type": "string",
+    "conditional": "Optional",
+    "remarks": "Customer company name."
+  },
+  {
+    "name": "title",
+    "type": "string",
+    "conditional": "Optional",
+    "remarks": "Plugin Title. Defaults to 'Process Payment' if not provided."
+  },
+  {
+    "name": "hideHeader",
+    "type": "boolean(true/false)",
+    "conditional": "Optional",
+    "remarks": "This will hide the program header including program logo. Defaults to 'true' if not provided."
+  },
+  {
+    "name": "hideMerchantLogo",
+    "type": "boolean(true/false)",
+    "conditional": "Optional",
+    "remarks": "This will hide the merchant logo if any. Defaults to 'false' if not provided."
+  },
+  {
+    "name": "overrideFeePayer",
+    "type": "int",
+    "conditional": "Optional",
+    "remarks": "Must be one of the following three values 0 - Default (based on pricing profile)1 - Merchant (Merchant will pay the fee regardless of pricing profile setting)2 - Customer (Customer will pay the fee regardless of pricing profile setting) Defaults to 0 if not provided."
+  },
+  {
+    "name": "departureDate",
+    "type": "string",
+    "conditional": "Optional",
+    "remarks": "departureDate is required for Slice Pay. Provide date in UTC ISO 8601 format as departureDate. format: yyyy-MM-dd"
+  },
+  {
+    "name": "userMode",
+    "type": "int",
+    "conditional": "Optional",
+    "remarks": "Must be one of the following two values 0 - Customer Facing - default (cardholder must enter CCV or 3DS)1 - Merchant Facing (for merchant use only - no CCV or 3DS) - if supported by merchant options."
+  },
+  {
+    "name": "minHeight",
+    "type": "int",
+    "conditional": "Optional",
+    "remarks": "For Mode 0 and 2 height defaults to 725px, for mode 1 height defaults to 450px if not provided."
+  },
+  {
+    "name": "onPluginClose",
+    "type": "function",
+    "conditional": "Optional",
+    "remarks": "Javascript callback function to execute when plug-in is closed."
+  },
+  {
+    "name": "sendConfirmationEmailToCustomer",
+    "type": "boolean(true/false)",
+    "conditional": "Optional",
+    "remarks": "This will send confirmation email to customer. Defaults to 'false' if not provided."
+  },
+  {
+    "name": "allowSaveCardUserOption",
+    "type": "boolean(true/false)",
+    "conditional": "Optional",
+    "remarks": "This will allow to save the card information. Defaults to 'false' if not provided. This option will only work if 'Enable Plugin Pay & Save Card' option is enabled at program or merchant level."
+  },
+  {
+    "name": "sku1",
+    "type": "string",
+    "conditional": "Optional",
+    "remarks": "Stock Keeping Unit – Optional text fields, allowing up to 50 alphanumeric characters. If the value exceeds 50 characters, only the first 50 characters will be retained and the rest discarded."
+  },
+  {
+    "name": "sku2",
+    "type": "string",
+    "conditional": "Optional",
+    "remarks": "Stock Keeping Unit – Optional text fields, allowing up to 50 alphanumeric characters. If the value exceeds 50 characters, only the first 50 characters will be retained and the rest discarded."
+  }
+]

@@ -332,6 +332,61 @@
 	</div>
 </div>
 
+<!-- SlicePay Departure Date Modal -->
+<div
+	class="modal fade"
+	id="slicePayDepartureDateModal"
+	data-bs-backdrop="static"
+	data-bs-keyboard="false"
+	tabindex="-1"
+	aria-labelledby="slicePayDepartureDateModalTitle"
+	aria-hidden="true"
+>
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header bg-primary-subtle">
+				<h5 class="modal-title" id="slicePayDepartureDateModalTitle">
+					<i class="bi bi-calendar-event me-2"></i>SlicePay Departure Date Required
+				</h5>
+				<button
+					type="button"
+					class="btn-close"
+					data-bs-dismiss="modal"
+					aria-label="Close"
+				></button>
+			</div>
+			<div class="modal-body">
+				<p class="text-muted mb-3">
+					SlicePay requires a departure date at least 21 days in advance.
+				</p>
+				<div class="input-group">
+					<span class="input-group-text">
+						<i class="bi bi-calendar-date"></i>
+					</span>
+					<input
+						type="date"
+						class="form-control"
+						id="departureDateInput"
+					/>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button
+					id="slicePayCancelBtn"
+					type="button"
+					class="btn btn-outline-secondary"
+					data-bs-dismiss="modal"
+				>
+					Cancel
+				</button>
+				<button id="slicePayConfirmBtn" type="button" class="btn btn-primary">
+					Confirm
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
 <!-- Toast container -->
 <div class="position-fixed top-0 end-0 p-3" style="z-index: 1080">
 	<div
