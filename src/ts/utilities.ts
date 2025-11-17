@@ -38,16 +38,6 @@ export class Base64Error extends Error {
 	}
 }
 
-// export class UniqueIdentifierGenerationError extends Error {
-// 	constructor(
-// 		message: string,
-// 		public override readonly cause?: Error
-// 	) {
-// 		super(message);
-// 		this.name = 'UniqueIdentifierGenerationError';
-// 	}
-// }
-
 export class CustomerGenerationError extends Error {
 	constructor(
 		message: string,
@@ -320,51 +310,6 @@ export function createAdvancedDebouncedFunction<T extends Fn>(
 	return fn;
 }
 
-// /** Create a throttled function that executes at most once per interval. */
-// export function createThrottledFunction<T extends Fn>(
-// 	originalFunction: T,
-// 	waitTimeInMilliseconds: number
-// ): DebouncedFunction<T> {
-// 	if (typeof originalFunction !== 'function') {
-// 		throw new Error('First argument must be a function');
-// 	}
-// 	if (!Number.isFinite(waitTimeInMilliseconds) || waitTimeInMilliseconds < 0) {
-// 		throw new Error('Wait time must be a non-negative number');
-// 	}
-
-// 	let lastExecution = 0;
-// 	let timeoutHandle: ReturnType<typeof setTimeout> | null = null;
-// 	let lastArgs: Parameters<T> | null = null;
-// 	let lastThis: ThisParameterType<T> | undefined;
-
-// 	return function throttled(this: ThisParameterType<T>, ...args: Parameters<T>) {
-// 		const now = Date.now();
-// 		const remaining = waitTimeInMilliseconds - (now - lastExecution);
-
-// 		lastArgs = args;
-// 		lastThis = this;
-
-// 		if (remaining <= 0) {
-// 			if (timeoutHandle) {
-// 				clearTimeout(timeoutHandle);
-// 				timeoutHandle = null;
-// 			}
-// 			lastExecution = now;
-// 			originalFunction.apply(lastThis, lastArgs);
-// 			lastArgs = null;
-// 		} else if (!timeoutHandle) {
-// 			timeoutHandle = setTimeout(() => {
-// 				lastExecution = Date.now();
-// 				timeoutHandle = null;
-// 				if (lastArgs) {
-// 					originalFunction.apply(lastThis, lastArgs);
-// 					lastArgs = null;
-// 				}
-// 			}, remaining);
-// 		}
-// 	};
-// }
-
 /** Generate a random customer name from predefined list */
 export function generateRandomCustomerName(): CustomerNameInformation {
 	const randomIndex = Math.floor(Math.random() * PREDEFINED_CUSTOMER_NAMES.length);
@@ -509,64 +454,3 @@ export class HelperFunctionError extends Error {
 		this.name = 'HelperFunctionError';
 	}
 }
-
-/**
- * Update redirect URL in the extended options and UI
- * @param newUrl - New redirect URL to set
- * @throws {HelperFunctionError} When URL update fails
- */
-// export function updateRedirectUrl(newUrl: string): void {
-// 	try {
-// 		// Set the redirect URL input value
-// 		const redirectInput = document.querySelector('#redirectUrlInput') as HTMLInputElement;
-// 		if (redirectInput) {
-// 			redirectInput.value = newUrl;
-// 		}
-
-// 		// Use the canonical function to handle the rest of the URL update logic
-// 		// Note: This requires importing updateRedirectUrlInForm from paymentUrlBuilder.ts
-// 		// For now, we'll just set the input value
-// 		console.log(`[updateRedirectUrl] Updated redirect URL to: ${newUrl}`);
-// 	} catch (error) {
-// 		throw new HelperFunctionError(
-// 			'Failed to update redirect URL',
-// 			'updateRedirectUrl',
-// 			error instanceof Error ? error : undefined
-// 		);
-// 	}
-// }
-
-// /**
-//  * Deep clone an object using structuredClone when available, fallback to manual cloning
-//  * @param obj - Object to clone
-//  * @returns Deep cloned object
-//  */
-// export function deepClone<T>(obj: T): T {
-// 	// Use structuredClone if available (modern browsers)
-// 	if (typeof structuredClone === 'function') {
-// 		try {
-// 			return structuredClone(obj);
-// 		} catch {
-// 			// Fall through to manual cloning
-// 		}
-// 	}
-
-// 	// Manual deep cloning fallback
-// 	if (obj === null || typeof obj !== 'object') {
-// 		return obj;
-// 	}
-// 	if (obj instanceof Date) {
-// 		return new Date(obj.getTime()) as T;
-// 	}
-// 	if (obj instanceof Array) {
-// 		return obj.map((item) => deepClone(item)) as T;
-// 	}
-// 	if (typeof obj === 'object') {
-// 		const cloned = {} as T;
-// 		Object.keys(obj).forEach((key) => {
-// 			(cloned as any)[key] = deepClone((obj as any)[key]);
-// 		});
-// 		return cloned;
-// 	}
-// 	return obj;
-// }

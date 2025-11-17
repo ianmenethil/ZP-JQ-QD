@@ -7,7 +7,6 @@ import { parseCodePreviewConfig } from './codePreview.ts';
 import { generatePaymentSecurityFingerprint } from './core/fingerprintGenerator.ts';
 import { showError } from './modals/modal.ts';
 import { getOriginalCredentialValue, saveCredentials, saveState } from './session.ts';
-// Removed unnecessary import - using new Date().toISOString().slice(0, 19) directly
 
 // Import jQuery only for the zpPayment plugin (required dependency)
 declare const $: any;
@@ -67,14 +66,6 @@ interface FingerprintParams {
 	merchantUniquePaymentId: string;
 	timestamp: string;
 }
-
-// /**
-//  * Session configuration interface extending ZenPayPluginConfig
-//  */
-// export interface SessionConfig extends ZenPayPluginConfig {
-// 	username: string;
-// 	password: string;
-// }
 
 /**
  * ZenPay plugin instance interface

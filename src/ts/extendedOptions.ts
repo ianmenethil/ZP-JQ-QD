@@ -17,15 +17,6 @@ import {
 // TYPE DEFINITIONS
 // ============================================================================
 
-// /**
-//  * Customer name data interface
-//  */
-// export interface CustomerNameData {
-// 	firstName: string;
-// 	lastName: string;
-// 	fullName: string;
-// }
-
 /**
  * Extended options configuration interface
  */
@@ -191,39 +182,6 @@ function generateCustomerData(): void {
 		);
 	}
 }
-
-/**
- * Generate UUIDs for customer reference and merchant unique payment ID (without populating form fields)
- * @throws {ExtendedOptionsError} When UUID generation fails
- * @example
- * ```typescript
- * const uuids = generateUuidsForExtendedOptions();
- * console.log('UUIDs generated for extended options');
- * ```
- */
-/* function generateUuidsForExtendedOptions(): {
-	customerReferenceIdentifier: string;
-	merchantUniquePaymentIdentifier: string;
-} {
-	try {
-		// Generate UUIDs directly using crypto.randomUUID()
-		const customerReferenceIdentifier = crypto.randomUUID();
-		const merchantUniquePaymentIdentifier = crypto.randomUUID();
-
-		console.log('[generateUuidsForExtendedOptions] UUIDs generated successfully');
-
-		return {
-			customerReferenceIdentifier,
-			merchantUniquePaymentIdentifier,
-		};
-	} catch (error) {
-		throw new ExtendedOptionsError(
-			'Failed to generate UUIDs for extended options',
-			'generate',
-			error instanceof Error ? error : undefined
-		);
-	}
-} */
 
 // ============================================================================
 // EVENT LISTENER SETUP

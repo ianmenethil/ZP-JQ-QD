@@ -180,21 +180,3 @@ export async function initOutputParametersModal(): Promise<void> {
 	const parameters = await getOutputParameters();
 	console.log('[outputParameters] Modal initialized with', parameters.length, 'parameters');
 }
-
-/**
- * Show output parameters modal with pre-filtered search
- */
-// export function showOutputParameterModal(searchTerm: string): void {
-// 	const modal = (window as any).outputParametersModal;
-// 	const searchInput = (window as any).outputParametersSearchInput;
-// 	const rerender = (window as any).outputParametersRerender;
-
-// 	if (!modal || !searchInput || !rerender) {
-// 		console.warn('[outputParameters] Modal not initialized');
-// 		return;
-// 	}
-
-// 	searchInput.value = searchTerm;
-// 	rerender();
-// 	modal.show();
-// }

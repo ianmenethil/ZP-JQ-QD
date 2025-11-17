@@ -18,13 +18,6 @@ export type ErrorCategory =
 	| 'Configuration'
 	| 'Other';
 
-// export interface ErrorCodeEntry {
-// 	code: string;
-// 	description: string;
-// 	possibleCauses: string[];
-// 	troubleshootingTips: string[];
-// }
-
 export interface ErrorCode {
 	readonly code: string;
 	readonly category: ErrorCategory;
@@ -228,21 +221,3 @@ export async function initErrorCodesSystem(): Promise<void> {
 	const errorCodes = await getErrorCodes();
 	console.log('[errorCodes] Modal initialized with', errorCodes.length, 'error codes');
 }
-
-/**
- * Show error codes modal with pre-filtered search
- */
-// export function showErrorCodeModal(searchTerm: string): void {
-// 	const modal = (window as any).errorCodesModal;
-// 	const searchInput = (window as any).errorCodesSearchInput;
-// 	const rerender = (window as any).errorCodesRerender;
-
-// 	if (!modal || !searchInput || !rerender) {
-// 		console.warn('[errorCodes] Modal not initialized');
-// 		return;
-// 	}
-
-// 	searchInput.value = searchTerm;
-// 	rerender();
-// 	modal.show();
-// }

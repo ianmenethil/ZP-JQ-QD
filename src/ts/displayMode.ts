@@ -67,17 +67,3 @@ export function initDisplayModeDropdown(): void {
 		console.error('[DisplayMode] Failed to initialize dropdown:', error);
 	}
 }
-
-/**
- * Get the currently selected display mode value
- * @returns '0' for Standard Modal, '1' for Redirect URL, or null if not found
- */
-// export function getDisplayMode(): string | null {
-// 	const modalRadio = document.getElementById('selectDisplayModeModal') as HTMLInputElement;
-// 	const redirectRadio = document.getElementById('selectDisplayModeRedirect') as HTMLInputElement;
-
-// 	if (modalRadio?.checked) return '0';
-// 	if (redirectRadio?.checked) return '1';
-
-// 	return null;
-// }

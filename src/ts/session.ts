@@ -246,11 +246,6 @@ export function loadState(): PaymentState | null {
 /**
  * Clear all ZenPay session storage
  */
-/* function clearSession(): void {
-    if (!store) return;
-    store.removeItem(KEYS.CREDENTIALS);
-    store.removeItem(KEYS.STATE);
-} */
 
 // ============================================================================
 // LEGACY STORAGE HELPERS (for theme, URL builder, etc.)
@@ -308,21 +303,6 @@ export function saveToStorage(key: string, value: unknown, type: StorageType = S
 		console.error(`[saveToStorage] Failed to encode base64 for key "${key}":`, error);
 	}
 }
-
-/**
- * Save to session storage (automatically base64 encoded)
- */
-/* function saveToSession(key: string, value: unknown): void {
-    if (!store) return;
-
-    try {
-        const raw = typeof value === 'string' ? value : safeStringify(value);
-        const encoded = encodeAsciiTextToBase64(raw);
-        store.setItem(key, encoded);
-    } catch (error) {
-        console.error(`[saveToSession] Failed to encode base64 for key "${key}":`, error);
-    }
-} */
 
 /**
  * Get from session storage with fallback (automatically base64 decoded)

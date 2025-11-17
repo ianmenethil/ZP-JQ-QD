@@ -6,9 +6,6 @@
 import { bootstrap } from '../globals.ts';
 import { showModal } from './modal.ts';
 
-/** Literal strings in JSON for the `type` field */
-// export type ParamType = 'string' | 'string (uri)' | 'string (email)' | 'integer' | 'boolean';
-
 /** Input parameter interface matching the JSON structure */
 export interface InputParameter {
 	name: string;
@@ -79,18 +76,6 @@ function convertToInternalFormat(externalData: InputParameter[]): InternalInputP
 export async function getInputParameters(): Promise<InternalInputParameter[]> {
 	return await loadInputParameters();
 }
-
-/**
- * Return an object of defaults for parameters that specify a non-null default
- */
-// export async function getDefaults(): Promise<Record<string, unknown>> {
-// 	const parameters = await getInputParameters();
-// 	const out: Record<string, unknown> = {};
-// 	for (const p of parameters) {
-// 		if (p.default !== null && p.default !== undefined) out[p.name] = p.default;
-// 	}
-// 	return out;
-// }
 
 /**
  * Filter input parameters based on search term

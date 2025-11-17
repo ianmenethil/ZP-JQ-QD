@@ -5,7 +5,6 @@
  */
 
 // Import CSS files
-// import '../css/params.css';
 import '../css/styles.css';
 
 // Import TypeScript modules

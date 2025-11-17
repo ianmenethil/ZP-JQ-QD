@@ -79,17 +79,6 @@ function createTooltipInstance(
 	}
 }
 
-/* function disposeExistingTooltips(selector = '[data-bs-toggle="tooltip"]'): void {
-    try {
-        document.querySelectorAll<HTMLElement>(selector).forEach((el) => {
-            const inst = bootstrap?.Tooltip?.getInstance?.(el);
-            inst?.dispose?.();
-        });
-    } catch (error) {
-        console.warn('[disposeExistingTooltips] Error disposing tooltips:', error);
-    }
-} */
-
 // ============================================================================
 // PUBLIC API
 // ============================================================================
@@ -158,25 +147,6 @@ export function initTooltips(config: TooltipConfig = {}): BootstrapTooltipInstan
 		);
 	}
 }
-
-// /**
-//  * Re-initialize tooltips for theme changes or dynamic content updates
-//  */
-// export function reinitializeTooltips(config: TooltipConfig = {}): BootstrapTooltipInstance[] {
-// 	try {
-// 		disposeExistingTooltips();
-// 		const instances = initTooltips(config);
-// 		console.log(`[reinitializeTooltips] Reinitialized ${instances.length} tooltips`);
-// 		return instances;
-// 	} catch (error) {
-// 		console.error('[reinitializeTooltips] Error during tooltip reinitialization:', error);
-// 		throw new TooltipInitializationError(
-// 			'Failed to reinitialize tooltips',
-// 			undefined,
-// 			error instanceof Error ? error : undefined
-// 		);
-// 	}
-// }
 
 /**
  * Check if an input/textarea field has text overflow (is truncated)
