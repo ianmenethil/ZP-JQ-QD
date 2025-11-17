@@ -2,6 +2,8 @@ import fs from 'fs';
 import { resolve } from 'path';
 import type { Plugin } from 'vite';
 import { defineConfig } from 'vite';
+import autoprefixer from 'autoprefixer';
+import cssnano from 'cssnano';
 
 /**
  * Custom plugin to handle @@include directives in HTML files
@@ -72,17 +74,9 @@ export default defineConfig(({ mode }) => {
 				},
 			},
 
-			// Minification settings
+			// Minification settings (terser will use default options)
 			minify: isDev ? false : 'terser',
-			terserOptions: {
-				compress: {
-					drop_console: false,
-					drop_debugger: true,
-				},
-				format: {
-					comments: false,
-				},
-			},
+
 
 			// Source maps
 			sourcemap: isDev,
@@ -91,10 +85,7 @@ export default defineConfig(({ mode }) => {
 		// CSS processing
 		css: {
 			postcss: {
-				plugins: [
-					require('autoprefixer'),
-					...(isDev ? [] : [require('cssnano')({ preset: 'default' })]),
-				],
+				plugins: [autoprefixer(), ...(isDev ? [] : [cssnano({ preset: 'default' })])],
 			},
 		},
 
