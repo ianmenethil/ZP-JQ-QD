@@ -183,24 +183,14 @@ function triggerFileDownload(content: string, filename: string): void {
 }
 
 /**
- * Generate initialization script for standalone demo
- * @param config - Download configuration
+ * Generates data intercept script for inlined JSON data
  * @param inputParams - Input parameters JSON
  * @param outputParams - Output parameters JSON
  * @param errorCodes - Error codes JSON
- * @returns Generated initialization script
+ * @returns Data intercept script content
  */
-function generateInitializationScript(
-	config: DownloadConfig,
-	inputParams: string,
-	outputParams: string,
-	errorCodes: string
-): string {
-	const { apiKey, username, password, merchantCode } = config;
-
-	return `
-<script>
-// Inline data files to avoid fetch errors
+function generateDataInterceptScript(inputParams: string, outputParams: string, errorCodes: string): string {
+	return `// Inline data files to avoid fetch errors
 window.__ZENPAY_DATA__ = {
   inputParameters: ${inputParams},
   outputParameters: ${outputParams},
@@ -229,9 +219,18 @@ window.fetch = function(url, options) {
     }));
   }
   return originalFetch.apply(this, arguments);
-};
+};`;
+}
 
-document.addEventListener('DOMContentLoaded', function() {
+/**
+ * Generates credential pre-fill script for DOMContentLoaded
+ * @param config - Download configuration
+ * @returns Credential pre-fill script content
+ */
+function generateCredentialPreFillScript(config: DownloadConfig): string {
+	const { apiKey, username, password, merchantCode } = config;
+
+	return `document.addEventListener('DOMContentLoaded', function() {
   // Pre-fill ONLY credentials (4 fields)
   const apiKeyField = document.getElementById('apiKeyInput');
   if (apiKeyField) apiKeyField.value = "${apiKey}";
@@ -246,7 +245,31 @@ document.addEventListener('DOMContentLoaded', function() {
   if (merchantCodeField) merchantCodeField.value = "${merchantCode}";
 
   console.log('ZenPay standalone configuration loaded successfully');
-});
+});`;
+}
+
+/**
+ * Generate initialization script for standalone demo
+ * @param config - Download configuration
+ * @param inputParams - Input parameters JSON
+ * @param outputParams - Output parameters JSON
+ * @param errorCodes - Error codes JSON
+ * @returns Generated initialization script
+ */
+function generateInitializationScript(
+	config: DownloadConfig,
+	inputParams: string,
+	outputParams: string,
+	errorCodes: string
+): string {
+	const dataInterceptScript = generateDataInterceptScript(inputParams, outputParams, errorCodes);
+	const credentialPreFillScript = generateCredentialPreFillScript(config);
+
+	return `
+<script>
+${dataInterceptScript}
+
+${credentialPreFillScript}
 </script>`;
 }
 
