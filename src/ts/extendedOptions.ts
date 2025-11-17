@@ -113,7 +113,9 @@ function updateExtendedOptionsProperty(
 	value: string
 ): void {
 	try {
-		(extendedOptions as any)[propertyName] = value;
+		// Use type assertion to writable Record since extendedOptions is defined with 'as const'
+		// This is safe because we're only updating string properties at runtime
+		(extendedOptions as unknown as Record<string, string | number>)[propertyName] = value;
 	} catch (error) {
 		console.warn(
 			`[updateExtendedOptionsProperty] Failed to update property ${propertyName}:`,
@@ -206,12 +208,12 @@ function setupExtendedOptionsEventListeners(): void {
 			if (element) {
 				// Remove existing listeners to prevent duplicates
 				const existingHandler = element.getAttribute('data-extended-options-handler');
-				if (existingHandler) {
-					element.removeEventListener('blur', (element as any)._extendedOptionsHandler);
+				if (existingHandler && element._extendedOptionsHandler) {
+					element.removeEventListener('blur', element._extendedOptionsHandler);
 				}
 
 				// Create new blur listener
-				const blurHandler = () => {
+				const blurHandler = (): void => {
 					try {
 						const inputValue = getFormFieldValue(selector);
 						updateExtendedOptionsProperty(optionPropertyName, inputValue);
@@ -229,7 +231,7 @@ function setupExtendedOptionsEventListeners(): void {
 				};
 
 				// Store handler reference and add listener
-				(element as any)._extendedOptionsHandler = blurHandler;
+				element._extendedOptionsHandler = blurHandler;
 				element.addEventListener('blur', blurHandler);
 				element.setAttribute('data-extended-options-handler', 'true');
 			}
@@ -239,14 +241,14 @@ function setupExtendedOptionsEventListeners(): void {
 		const domainSelect = document.querySelector('#domainSelect') as HTMLSelectElement;
 		if (domainSelect) {
 			// Remove existing listener
-			if (domainSelect.getAttribute('data-extended-options-domain-handler')) {
+			if (domainSelect.getAttribute('data-extended-options-domain-handler') && domainSelect._extendedOptionsDomainHandler) {
 				domainSelect.removeEventListener(
 					'change',
-					(domainSelect as any)._extendedOptionsDomainHandler
+					domainSelect._extendedOptionsDomainHandler
 				);
 			}
 
-			const changeHandler = () => {
+			const changeHandler = (): void => {
 				try {
 					updateRedirectUrlInForm();
 				} catch (error) {
@@ -254,7 +256,7 @@ function setupExtendedOptionsEventListeners(): void {
 				}
 			};
 
-			(domainSelect as any)._extendedOptionsDomainHandler = changeHandler;
+			domainSelect._extendedOptionsDomainHandler = changeHandler;
 			domainSelect.addEventListener('change', changeHandler);
 			domainSelect.setAttribute('data-extended-options-domain-handler', 'true');
 		}

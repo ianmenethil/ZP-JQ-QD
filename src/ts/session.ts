@@ -17,6 +17,7 @@ import {
 	obfuscateCredential,
 	safeParse,
 	safeStringify,
+	type Base64EncodedString,
 } from './utilities.ts';
 
 // ============================================================================
@@ -153,7 +154,7 @@ export function loadCredentials(): Credentials | null {
 	if (!encoded) return null;
 
 	try {
-		const json = decodeBase64TextToAscii(encoded as any);
+		const json = decodeBase64TextToAscii(encoded as Base64EncodedString);
 		return safeParse<Credentials>(json);
 	} catch (error) {
 		console.error('[loadCredentials] Failed to decode credentials:', error);
@@ -235,7 +236,7 @@ export function loadState(): PaymentState | null {
 	if (!encoded) return null;
 
 	try {
-		const json = decodeBase64TextToAscii(encoded as any);
+		const json = decodeBase64TextToAscii(encoded as Base64EncodedString);
 		return safeParse<PaymentState>(json);
 	} catch (error) {
 		console.error('[loadState] Failed to decode state:', error);
@@ -276,7 +277,7 @@ export function getFromStorage<T = unknown>(
 
 	try {
 		// Decode base64 first
-		const decoded = decodeBase64TextToAscii(encoded as any);
+		const decoded = decodeBase64TextToAscii(encoded as Base64EncodedString);
 		const parsed = safeParse<T>(decoded);
 
 		if (parsed !== null) return parsed;
@@ -317,7 +318,7 @@ export function getFromSession<T>(key: string, fallback?: T): T | null {
 
 	try {
 		// Decode base64 first
-		const decoded = decodeBase64TextToAscii(encoded as any);
+		const decoded = decodeBase64TextToAscii(encoded as Base64EncodedString);
 		const parsed = safeParse<T>(decoded);
 
 		if (parsed !== null) return parsed;

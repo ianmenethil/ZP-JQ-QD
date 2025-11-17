@@ -190,10 +190,17 @@ import { EventListenerError } from './buttonState.logic.ts';
  * Automatically wraps methods with try/catch and logging
  */
 export function HandleErrors(fnName: string) {
-	return function (_target: any, _propertyKey: string, descriptor: PropertyDescriptor) {
+	return function <T extends (...args: unknown[]) => unknown>(
+		_target: object,
+		_propertyKey: string,
+		descriptor: TypedPropertyDescriptor<T>
+	): TypedPropertyDescriptor<T> {
 		const originalMethod = descriptor.value;
+		if (!originalMethod) {
+			return descriptor;
+		}
 
-		descriptor.value = function (...args: any[]) {
+		descriptor.value = function (this: unknown, ...args: unknown[]): unknown {
 			try {
 				return originalMethod.apply(this, args);
 			} catch (error) {
@@ -204,6 +211,8 @@ export function HandleErrors(fnName: string) {
 					error instanceof Error ? error : undefined
 				);
 			}
-		};
+		} as T;
+
+		return descriptor;
 	};
 }

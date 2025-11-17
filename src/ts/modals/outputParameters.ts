@@ -173,9 +173,11 @@ export async function initOutputParametersModal(): Promise<void> {
 	}
 
 	// Make rerender globally available for info icon functions
-	(window as any).outputParametersRerender = rerender;
-	(window as any).outputParametersModal = modal;
-	(window as any).outputParametersSearchInput = searchInput;
+	window.outputParametersRerender = rerender;
+	window.outputParametersModal = modal;
+	if (searchInput) {
+		window.outputParametersSearchInput = searchInput;
+	}
 
 	const parameters = await getOutputParameters();
 	console.log('[outputParameters] Modal initialized with', parameters.length, 'parameters');

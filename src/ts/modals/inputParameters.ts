@@ -165,9 +165,11 @@ export async function initInputParametersModal(): Promise<void> {
 	}
 
 	// Make rerender globally available for info icon functions
-	(window as any).inputParametersRerender = rerender;
-	(window as any).inputParametersModal = modal;
-	(window as any).inputParametersSearchInput = searchInput;
+	window.inputParametersRerender = rerender;
+	window.inputParametersModal = modal;
+	if (searchInput) {
+		window.inputParametersSearchInput = searchInput;
+	}
 
 	const parameters = await getInputParameters();
 	console.log('[inputParameters] Modal initialized with', parameters.length, 'parameters');
@@ -177,9 +179,9 @@ export async function initInputParametersModal(): Promise<void> {
  * Show input parameters modal with pre-filtered search
  */
 export function showParameterModal(searchTerm: string): void {
-	const modal = (window as any).inputParametersModal;
-	const searchInput = (window as any).inputParametersSearchInput;
-	const rerender = (window as any).inputParametersRerender;
+	const modal = window.inputParametersModal;
+	const searchInput = window.inputParametersSearchInput;
+	const rerender = window.inputParametersRerender;
 
 	if (!modal || !searchInput || !rerender) {
 		console.warn('[inputParameters] Modal not initialized');
@@ -187,6 +189,6 @@ export function showParameterModal(searchTerm: string): void {
 	}
 
 	searchInput.value = searchTerm;
-	rerender();
+	void rerender();
 	modal.show();
 }

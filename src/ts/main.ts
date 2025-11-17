@@ -191,7 +191,7 @@ export async function initializeApp(): Promise<void> {
 		initSlicePayDepartureDate();
 
 		// Make showParameterModal globally available for info icons
-		(window as any).showParameterModal = showParameterModal;
+		window.showParameterModal = showParameterModal;
 
 		console.log('[main] Application initialization completed successfully');
 	} catch (error) {

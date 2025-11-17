@@ -214,9 +214,11 @@ export async function initErrorCodesSystem(): Promise<void> {
 	}
 
 	// Make rerender globally available for info icon functions
-	(window as any).errorCodesRerender = rerender;
-	(window as any).errorCodesModal = modal;
-	(window as any).errorCodesSearchInput = searchInput;
+	window.errorCodesRerender = rerender;
+	window.errorCodesModal = modal;
+	if (searchInput) {
+		window.errorCodesSearchInput = searchInput;
+	}
 
 	const errorCodes = await getErrorCodes();
 	console.log('[errorCodes] Modal initialized with', errorCodes.length, 'error codes');

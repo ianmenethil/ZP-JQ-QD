@@ -9,7 +9,12 @@ import { showError } from './modals/modal.ts';
 import { getOriginalCredentialValue, saveCredentials, saveState } from './session.ts';
 
 // Import jQuery only for the zpPayment plugin (required dependency)
-declare const $: any;
+// jQuery is loaded externally and provides the zpPayment plugin
+interface JQueryStatic {
+	zpPayment(config: Partial<ZenPayPluginConfig>): ZenPayPluginInstance;
+}
+
+declare const $: JQueryStatic;
 
 // ============================================================================
 // TYPE DEFINITIONS

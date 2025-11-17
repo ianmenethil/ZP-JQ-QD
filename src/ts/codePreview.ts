@@ -312,7 +312,8 @@ async function _updateCodePreviewInternal(): Promise<void> {
 		const codePreviewEl = document.getElementById('codePreview');
 		if (codePreviewEl) {
 			codePreviewEl.textContent = snippet;
-			delete (codePreviewEl as any).dataset.highlighted;
+			// Remove highlighted flag so hljs will re-highlight the element
+			delete codePreviewEl.dataset['highlighted'];
 			hljs.highlightElement(codePreviewEl);
 		}
 	} catch (error) {

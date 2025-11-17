@@ -1,5 +1,5 @@
 /** Base64 encoded string type for better type safety */
-type Base64EncodedString = string & { readonly __brand: 'Base64EncodedString' };
+export type Base64EncodedString = string & { readonly __brand: 'Base64EncodedString' };
 
 /** Complete customer name information */
 interface CustomerNameInformation {

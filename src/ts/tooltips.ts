@@ -69,7 +69,7 @@ function createTooltipInstance(
 		const existing = bootstrap?.Tooltip?.getInstance?.(element);
 		existing?.dispose?.();
 
-		return new bootstrap.Tooltip(element, defaultConfig) as BootstrapTooltipInstance;
+		return new bootstrap.Tooltip(element, defaultConfig as Record<string, unknown>) as BootstrapTooltipInstance;
 	} catch (error) {
 		throw new TooltipInitializationError(
 			'Failed to create tooltip instance',

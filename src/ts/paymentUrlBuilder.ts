@@ -116,7 +116,7 @@ export function updateRedirectUrlInForm(): void {
 		}
 
 		// Update extended options
-		(extendedOptions as any).redirectUrl = redirectUrl;
+		(extendedOptions as unknown as Record<string, string | number>)['redirectUrl'] = redirectUrl;
 
 		// Update code preview if available
 		if (typeof updateCodePreview === 'function') {
@@ -314,7 +314,7 @@ function setupUrlBuilderEventListeners(): void {
 	}
 
 	// Create modal instance once (same pattern as errorCodes)
-	const modal = new (window as any).bootstrap.Modal(modalEl);
+	const modal = new window.bootstrap.Modal(modalEl);
 	console.log('[setupUrlBuilderEventListeners] Bootstrap Modal instance created');
 
 	// Subdomain radio buttons
