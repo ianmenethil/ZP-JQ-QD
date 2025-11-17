@@ -17,7 +17,7 @@ export const hljs = (() => {
 })();
 
 export const sha3_512: Sha3HashFunction = (data: string): string => {
-	const fn = (globalThis as any).sha3_512 ?? (window as any).sha3_512;
+	const fn = (globalThis as typeof globalThis & { sha3_512?: unknown }).sha3_512 ?? window.sha3_512;
 	if (typeof fn !== 'function') {
 		console.warn('sha3_512 function is not defined. Ensure the library is loaded.');
 		return '';
@@ -26,7 +26,10 @@ export const sha3_512: Sha3HashFunction = (data: string): string => {
 	// Handle different possible signatures of the sha3_512 function
 	try {
 		// Try calling with data parameter first (expected signature)
-		return (fn as any)(data);
+		const result = fn(data);
+		if (typeof result === 'string') {
+			return result;
+		}
 	} catch (error) {
 		console.warn(
 			'sha3_512 function failed with data parameter, trying alternative signature:',
@@ -35,9 +38,12 @@ export const sha3_512: Sha3HashFunction = (data: string): string => {
 
 		// If that fails, try calling without parameters to get a hash function
 		try {
-			const hashFn = (fn as any)();
-			if (typeof hashFn === 'function') {
-				return hashFn(data);
+			const hashFnResult: unknown = (fn as () => unknown)();
+			if (typeof hashFnResult === 'function') {
+				const result = (hashFnResult as (data: string) => unknown)(data);
+				if (typeof result === 'string') {
+					return result;
+				}
 			}
 		} catch (fallbackError) {
 			console.warn('sha3_512 function fallback also failed:', fallbackError);
@@ -45,6 +51,8 @@ export const sha3_512: Sha3HashFunction = (data: string): string => {
 
 		return '';
 	}
+
+	return '';
 };
 
 // Side-effects: V3 compat flags and help, as in original file

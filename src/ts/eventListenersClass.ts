@@ -26,7 +26,7 @@ export class EventListeners {
 			FIELD_IDS.MERCHANT_CODE,
 		];
 
-		const handleCredentialBlur = (_e: Event) => {
+		const handleCredentialBlur = () => {
 			updateCodePreview();
 			updateActionButtonsState();
 		};

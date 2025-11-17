@@ -82,12 +82,3 @@ export function initPaymentModeDropdown(): void {
 		console.error('[PaymentMode] Failed to initialize dropdown:', error);
 	}
 }
-
-/**
- * Get the currently selected payment mode value
- * @returns '0', '1', '2', or '3', or null if not found
- */
-// export function getPaymentMode(): string | null {
-// 	const modeSelect = document.getElementById('modeSelect') as HTMLSelectElement;
-// 	return modeSelect?.value || null;
-// }

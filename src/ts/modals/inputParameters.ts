@@ -6,9 +6,6 @@
 import { bootstrap } from '../globals.ts';
 import { showModal } from './modal.ts';
 
-/** Literal strings in JSON for the `type` field */
-// export type ParamType = 'string' | 'string (uri)' | 'string (email)' | 'integer' | 'boolean';
-
 /** Input parameter interface matching the JSON structure */
 export interface InputParameter {
 	name: string;
@@ -79,18 +76,6 @@ function convertToInternalFormat(externalData: InputParameter[]): InternalInputP
 export async function getInputParameters(): Promise<InternalInputParameter[]> {
 	return await loadInputParameters();
 }
-
-/**
- * Return an object of defaults for parameters that specify a non-null default
- */
-// export async function getDefaults(): Promise<Record<string, unknown>> {
-// 	const parameters = await getInputParameters();
-// 	const out: Record<string, unknown> = {};
-// 	for (const p of parameters) {
-// 		if (p.default !== null && p.default !== undefined) out[p.name] = p.default;
-// 	}
-// 	return out;
-// }
 
 /**
  * Filter input parameters based on search term
@@ -180,9 +165,11 @@ export async function initInputParametersModal(): Promise<void> {
 	}
 
 	// Make rerender globally available for info icon functions
-	(window as any).inputParametersRerender = rerender;
-	(window as any).inputParametersModal = modal;
-	(window as any).inputParametersSearchInput = searchInput;
+	window.inputParametersRerender = rerender;
+	window.inputParametersModal = modal;
+	if (searchInput) {
+		window.inputParametersSearchInput = searchInput;
+	}
 
 	const parameters = await getInputParameters();
 	console.log('[inputParameters] Modal initialized with', parameters.length, 'parameters');
@@ -192,9 +179,9 @@ export async function initInputParametersModal(): Promise<void> {
  * Show input parameters modal with pre-filtered search
  */
 export function showParameterModal(searchTerm: string): void {
-	const modal = (window as any).inputParametersModal;
-	const searchInput = (window as any).inputParametersSearchInput;
-	const rerender = (window as any).inputParametersRerender;
+	const modal = window.inputParametersModal;
+	const searchInput = window.inputParametersSearchInput;
+	const rerender = window.inputParametersRerender;
 
 	if (!modal || !searchInput || !rerender) {
 		console.warn('[inputParameters] Modal not initialized');
@@ -202,6 +189,6 @@ export function showParameterModal(searchTerm: string): void {
 	}
 
 	searchInput.value = searchTerm;
-	rerender();
+	void rerender();
 	modal.show();
 }

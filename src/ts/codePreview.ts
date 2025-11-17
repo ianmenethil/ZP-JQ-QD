@@ -80,6 +80,235 @@ function getRadioValue(name: string): number {
 }
 
 /**
+ * Gets input value or its placeholder if empty
+ * @param inputId - Input element ID
+ * @param fallbackGenerator - Optional function to generate fallback value
+ * @returns Input value, placeholder, or generated fallback
+ */
+function getInputValueOrPlaceholder(inputId: string, fallbackGenerator?: () => string): string {
+	const value = DomUtils.getValue(`#${inputId}`);
+	if (value) {
+		return value;
+	}
+
+	const input = document.getElementById(inputId) as HTMLInputElement;
+	return input?.placeholder || (fallbackGenerator ? fallbackGenerator() : '');
+}
+
+/**
+ * Collects customer-related field values
+ * @returns Object containing customer details
+ */
+function collectCustomerDetails(): {
+	customerReference: string;
+	customerName: string;
+	customerEmail: string;
+	contactNumber: string;
+	additionalReference: string;
+} {
+	const customerReference = getInputValueOrPlaceholder('customerReferenceInput', () => crypto.randomUUID());
+
+	let customerName = getInputValueOrPlaceholder('customerNameInput');
+	let customerEmail = DomUtils.getValue('#customerEmailInput');
+
+	if (!customerName) {
+		const input = document.getElementById('customerNameInput') as HTMLInputElement;
+		customerName = input?.placeholder || '';
+		if (!customerEmail) {
+			const emailInput = document.getElementById('customerEmailInput') as HTMLInputElement;
+			customerEmail = emailInput?.placeholder || '';
+		}
+	}
+
+	const contactNumber = getInputValueOrPlaceholder('contactNumberInput', generateRandomContactNumber);
+	const additionalReference = getInputValueOrPlaceholder('additionalReferenceInput', () => crypto.randomUUID());
+
+	return { customerReference, customerName, customerEmail, contactNumber, additionalReference };
+}
+
+/**
+ * Collects URL configuration values
+ * @returns Object containing redirect and callback URLs
+ */
+function collectUrls(): { redirectUrl: string; callbackUrl: string } {
+	return {
+		redirectUrl: DomUtils.getValue('#redirectUrlInput') || DEFAULT_VALUES.extended.redirectUrl,
+		callbackUrl: DomUtils.getValue('#callbackUrlInput'),
+	};
+}
+
+/**
+ * Builds array of required properties for code snippet
+ * @param config - Code snippet configuration
+ * @param merchantCode - Merchant code value
+ * @param url - Gateway URL
+ * @param customerReference - Customer reference value
+ * @returns Array of property strings
+ */
+function buildRequiredProperties(
+	config: CodeSnippetConfig,
+	merchantCode: string,
+	url: string,
+	customerReference: string,
+	redirectUrl: string
+): string[] {
+	const { apiKey, paymentAmount, mode, timestamp, merchantUniquePaymentId, fingerprint } = config;
+
+	return [
+		`timeStamp: "${timestamp}"`,
+		`url: "${url}"`,
+		`merchantCode: "${merchantCode}"`,
+		`apiKey: "${apiKey}"`,
+		`fingerprint: "${fingerprint}"`,
+		`paymentAmount: ${paymentAmount}`,
+		`merchantUniquePaymentId: "${merchantUniquePaymentId}"`,
+		`mode: ${mode}`,
+		`redirectUrl: "${redirectUrl}"`,
+		...(customerReference ? [`customerReference: "${customerReference}"`] : []),
+	];
+}
+
+/**
+ * Adds optional customer-related fields to properties array
+ * @param properties - Properties array to modify
+ * @param customerName - Customer name value
+ * @param customerEmail - Customer email value
+ * @param callbackUrl - Callback URL value
+ * @param additionalReference - Additional reference value
+ * @param contactNumber - Contact number value
+ */
+function addOptionalCustomerFields(
+	properties: string[],
+	customerName: string,
+	customerEmail: string,
+	callbackUrl: string,
+	additionalReference: string,
+	contactNumber: string
+): void {
+	if (customerName) properties.push(`customerName: "${customerName}"`);
+	if (customerEmail) properties.push(`customerEmail: "${customerEmail}"`);
+	if (callbackUrl) properties.push(`callbackUrl: "${callbackUrl}"`);
+	if (additionalReference) properties.push(`additionalReference: "${additionalReference}"`);
+	if (contactNumber) properties.push(`contactNumber: ${contactNumber}`);
+}
+
+/**
+ * Adds payment method options to properties array
+ * @param properties - Properties array to modify
+ */
+function addPaymentMethodOptions(properties: string[]): void {
+	const paymentMethods = [
+		'allowBankAcOneOffPayment',
+		'allowPayToOneOffPayment',
+		'allowPayIdOneOffPayment',
+		'allowApplePayOneOffPayment',
+		'allowGooglePayOneOffPayment',
+		'allowSlicePayOneOffPayment',
+		'allowSaveCardUserOption',
+		'allowUnionPayOneOffPayment',
+	];
+
+	paymentMethods.forEach(method => {
+		if (getCheckboxState(`#${method}`)) {
+			properties.push(`${method}: true`);
+		}
+	});
+}
+
+/**
+ * Adds additional options to properties array
+ * @param properties - Properties array to modify
+ */
+function addAdditionalOptions(properties: string[]): void {
+	const additionalOptions = [
+		'sendConfirmationEmailToCustomer',
+		'sendConfirmationEmailToMerchant',
+		'hideTermsAndConditions',
+		'hideMerchantLogo',
+	];
+
+	additionalOptions.forEach(option => {
+		if (getCheckboxState(`#${option}`)) {
+			properties.push(`${option}: true`);
+		}
+	});
+}
+
+/**
+ * Adds tokenization-specific options to properties array
+ * @param properties - Properties array to modify
+ * @param mode - Payment mode
+ */
+function addTokenizationOptions(properties: string[], mode: string): void {
+	if (mode === '1') {
+		if (getCheckboxState('#showFeeOnTokenising')) {
+			properties.push('showFeeOnTokenising: true');
+		}
+		if (getCheckboxState('#showFailedPaymentFeeOnTokenising')) {
+			properties.push('showFailedPaymentFeeOnTokenising: true');
+		}
+	}
+}
+
+/**
+ * Adds user interface options to properties array
+ * @param properties - Properties array to modify
+ */
+function addUserInterfaceOptions(properties: string[]): void {
+	const userMode = getRadioValue('userMode');
+	if (userMode !== 0) {
+		properties.push(`userMode: ${userMode}`);
+	}
+
+	const overrideFeePayer = getRadioValue('overrideFeePayer');
+	if (overrideFeePayer !== 0) {
+		properties.push(`overrideFeePayer: ${overrideFeePayer}`);
+	}
+
+	const displayMode = getRadioValue('displayMode');
+	if (displayMode !== 0) {
+		properties.push(`displayMode: ${displayMode}`);
+	}
+}
+
+/**
+ * Adds numeric configuration options to properties array
+ * @param properties - Properties array to modify
+ * @param mode - Payment mode
+ */
+function addNumericOptions(properties: string[], mode: string): void {
+	const minHeight = parseInt(DomUtils.getValue('#minHeightInput'), 10);
+	const defaultHeight = mode === '1' ? 600 : DEFAULT_VALUES.options.minHeight;
+	if (minHeight && minHeight !== defaultHeight) {
+		properties.push(`minHeight: ${minHeight}`);
+	}
+}
+
+/**
+ * Adds SlicePay-specific options to properties array
+ * @param properties - Properties array to modify
+ */
+function addSlicePayOptions(properties: string[]): void {
+	if (getCheckboxState('#allowSlicePayOneOffPayment')) {
+		const departureDate = DomUtils.getValue('#departureDateInput');
+		if (departureDate) {
+			properties.push(`departureDate: "${departureDate}"`);
+		}
+	}
+}
+
+/**
+ * Formats properties array into final code snippet
+ * @param properties - Array of property strings
+ * @returns Formatted JavaScript code snippet
+ */
+function formatCodeSnippet(properties: string[]): string {
+	let snippet = `var payment = $.zpPayment({\n    ${properties.join(',\n    ')}\n});`;
+	snippet += `\n\npayment.init();`;
+	return snippet.trim();
+}
+
+/**
  * Builds JavaScript code snippet for ZenPay plugin initialization
  * @param config - Code snippet configuration
  * @returns Formatted JavaScript code string
@@ -87,161 +316,37 @@ function getRadioValue(name: string): number {
  */
 function buildCodeSnippet(config: CodeSnippetConfig): string {
 	try {
-		const { apiKey, paymentAmount, mode, timestamp, merchantUniquePaymentId, fingerprint } = config;
-
 		const url = DomUtils.getValue('#urlPreview');
 		const merchantCode = DomUtils.getValue('#merchantCodeInput') || DEFAULT_VALUES.credentials.merchantCode;
 
-		// Get customer values or use placeholders
-		let customerReference = DomUtils.getValue('#customerReferenceInput');
-		if (!customerReference) {
-			const input = document.getElementById('customerReferenceInput') as HTMLInputElement;
-			customerReference = input?.placeholder || crypto.randomUUID();
-		}
+		const customerDetails = collectCustomerDetails();
+		const urls = collectUrls();
 
-		let customerName = DomUtils.getValue('#customerNameInput');
-		let customerEmail = DomUtils.getValue('#customerEmailInput');
-		if (!customerName) {
-			const input = document.getElementById('customerNameInput') as HTMLInputElement;
-			customerName = input?.placeholder || '';
-			// Only use placeholder for email if both are empty
-			if (!customerEmail) {
-				const emailInput = document.getElementById('customerEmailInput') as HTMLInputElement;
-				customerEmail = emailInput?.placeholder || '';
-			}
-		}
+		const properties = buildRequiredProperties(
+			config,
+			merchantCode,
+			url,
+			customerDetails.customerReference,
+			urls.redirectUrl
+		);
 
-		let contactNumber = DomUtils.getValue('#contactNumberInput');
-		if (!contactNumber) {
-			const input = document.getElementById('contactNumberInput') as HTMLInputElement;
-			contactNumber = input?.placeholder || generateRandomContactNumber();
-		}
+		addOptionalCustomerFields(
+			properties,
+			customerDetails.customerName,
+			customerDetails.customerEmail,
+			urls.callbackUrl,
+			customerDetails.additionalReference,
+			customerDetails.contactNumber
+		);
 
-		let additionalReference = DomUtils.getValue('#additionalReferenceInput');
-		if (!additionalReference) {
-			const input = document.getElementById('additionalReferenceInput') as HTMLInputElement;
-			additionalReference = input?.placeholder || crypto.randomUUID();
-		}
+		addPaymentMethodOptions(properties);
+		addAdditionalOptions(properties);
+		addTokenizationOptions(properties, config.mode);
+		addUserInterfaceOptions(properties);
+		addNumericOptions(properties, config.mode);
+		addSlicePayOptions(properties);
 
-		const redirectUrl = DomUtils.getValue('#redirectUrlInput') || DEFAULT_VALUES.extended.redirectUrl;
-		const callbackUrl = DomUtils.getValue('#callbackUrlInput');
-
-		// Start with required properties
-		const properties: string[] = [
-			`timeStamp: "${timestamp}"`,
-			`url: "${url}"`,
-			`merchantCode: "${merchantCode}"`,
-			`apiKey: "${apiKey}"`,
-			`fingerprint: "${fingerprint}"`,
-			`paymentAmount: ${paymentAmount}`,
-			`merchantUniquePaymentId: "${merchantUniquePaymentId}"`,
-			`mode: ${mode}`,
-			`redirectUrl: "${redirectUrl}"`,
-		];
-
-		if (customerReference) {
-			properties.push(`customerReference: "${customerReference}"`);
-		}
-
-		if (customerName) {
-			properties.push(`customerName: "${customerName}"`);
-		}
-
-		if (customerEmail) {
-			properties.push(`customerEmail: "${customerEmail}"`);
-		}
-
-		if (callbackUrl) {
-			properties.push(`callbackUrl: "${callbackUrl}"`);
-		}
-
-		if (additionalReference) {
-			properties.push(`additionalReference: "${additionalReference}"`);
-		}
-
-		// Add payment method options
-		const paymentMethods = [
-			'allowBankAcOneOffPayment',
-			'allowPayToOneOffPayment',
-			'allowPayIdOneOffPayment',
-			'allowApplePayOneOffPayment',
-			'allowGooglePayOneOffPayment',
-			'allowSlicePayOneOffPayment',
-			'allowSaveCardUserOption',
-			'allowUnionPayOneOffPayment',
-		];
-
-		paymentMethods.forEach(method => {
-			if (getCheckboxState(`#${method}`)) {
-				properties.push(`${method}: true`);
-			}
-		});
-
-		// Add additional options
-		const additionalOptions = [
-			'sendConfirmationEmailToCustomer',
-			'sendConfirmationEmailToMerchant',
-			'hideTermsAndConditions',
-			'hideMerchantLogo',
-		];
-
-		additionalOptions.forEach(option => {
-			if (getCheckboxState(`#${option}`)) {
-				properties.push(`${option}: true`);
-			}
-		});
-
-		// Add tokenization options for mode 1
-		if (mode === '1') {
-			if (getCheckboxState('#showFeeOnTokenising')) {
-				properties.push('showFeeOnTokenising: true');
-			}
-			if (getCheckboxState('#showFailedPaymentFeeOnTokenising')) {
-				properties.push('showFailedPaymentFeeOnTokenising: true');
-			}
-		}
-
-		// Add user mode and fee payer options
-		const userMode = getRadioValue('userMode');
-		if (userMode !== 0) {
-			properties.push(`userMode: ${userMode}`);
-		}
-
-		const overrideFeePayer = getRadioValue('overrideFeePayer');
-		if (overrideFeePayer !== 0) {
-			properties.push(`overrideFeePayer: ${overrideFeePayer}`);
-		}
-
-		// Add display mode
-		const displayMode = getRadioValue('displayMode');
-		if (displayMode !== 0) {
-			properties.push(`displayMode: ${displayMode}`);
-		}
-
-		// Add minHeight if different from default
-		const minHeight = parseInt(DomUtils.getValue('#minHeightInput'), 10);
-		const defaultHeight = mode === '1' ? 600 : DEFAULT_VALUES.options.minHeight;
-		if (minHeight && minHeight !== defaultHeight) {
-			properties.push(`minHeight: ${minHeight}`);
-		}
-
-		// Add contact number if provided
-		if (contactNumber) {
-			properties.push(`contactNumber: ${contactNumber}`);
-		}
-
-		// Add departure date if SlicePay is enabled
-		if (getCheckboxState('#allowSlicePayOneOffPayment')) {
-			const departureDate = DomUtils.getValue('#departureDateInput');
-			if (departureDate) {
-				properties.push(`departureDate: "${departureDate}"`);
-			}
-		}
-
-		let snippet = `var payment = $.zpPayment({\n    ${properties.join(',\n    ')}\n});`;
-		snippet += `\n\npayment.init();`;
-
-		return snippet.trim();
+		return formatCodeSnippet(properties);
 	} catch (error) {
 		throw new CodePreviewError(
 			'Failed to build code snippet',
@@ -252,69 +357,112 @@ function buildCodeSnippet(config: CodeSnippetConfig): string {
 }
 
 /**
+ * Collects form values with fallback to placeholders or defaults
+ * @returns Object containing all required form values
+ */
+function collectFormValuesWithPlaceholders(): {
+	merchantUniquePaymentId: string;
+	apiKey: string;
+	username: string;
+	password: string;
+	paymentAmount: number;
+	mode: string;
+} {
+	let merchantUniquePaymentId = DomUtils.getValue('#merchantUniquePaymentIdInput');
+	if (!merchantUniquePaymentId) {
+		const input = document.getElementById('merchantUniquePaymentIdInput') as HTMLInputElement;
+		merchantUniquePaymentId = input?.placeholder || crypto.randomUUID();
+	}
+
+	const apiKey = DomUtils.getValue('#apiKeyInput') || DEFAULT_VALUES.credentials.apiKey;
+	const username = DomUtils.getValue('#usernameInput') || DEFAULT_VALUES.credentials.username;
+	const password = DomUtils.getValue('#passwordInput') || DEFAULT_VALUES.credentials.password;
+
+	let paymentAmountStr = DomUtils.getValue('#paymentAmountInput');
+	if (!paymentAmountStr) {
+		const input = document.getElementById('paymentAmountInput') as HTMLInputElement;
+		paymentAmountStr = input?.placeholder || generateRandomPaymentAmount(10.0, 1000.0);
+	}
+	const paymentAmount = parseFloat(paymentAmountStr);
+
+	const mode = DomUtils.getValue('#modeSelect');
+
+	return { merchantUniquePaymentId, apiKey, username, password, paymentAmount, mode };
+}
+
+/**
+ * Generates fingerprint with error handling
+ * @param formValues - Form values for fingerprint generation
+ * @param timestamp - Current timestamp
+ * @returns Generated fingerprint or empty string on error
+ */
+async function generateFingerprintSafely(
+	formValues: {
+		apiKey: string;
+		username: string;
+		password: string;
+		paymentAmount: number;
+		mode: string;
+		merchantUniquePaymentId: string;
+	},
+	timestamp: string
+): Promise<string> {
+	try {
+		const { apiKey, username, password, paymentAmount, mode, merchantUniquePaymentId } = formValues;
+
+		if (apiKey && username && password && paymentAmount && mode && timestamp && merchantUniquePaymentId) {
+			return await generateFingerprint(
+				apiKey,
+				username,
+				password,
+				mode,
+				paymentAmount.toString(),
+				merchantUniquePaymentId,
+				timestamp
+			);
+		}
+	} catch (error) {
+		console.warn('[generateFingerprintSafely] Could not generate fingerprint:', error);
+	}
+
+	return '';
+}
+
+/**
+ * Updates code preview DOM element with syntax highlighting
+ * @param snippet - Code snippet to display
+ */
+function updateCodePreviewDisplay(snippet: string): void {
+	const codePreviewEl = document.getElementById('codePreview');
+	if (codePreviewEl) {
+		codePreviewEl.textContent = snippet;
+		delete codePreviewEl.dataset['highlighted'];
+		hljs.highlightElement(codePreviewEl);
+	}
+}
+
+/**
  * Internal update code preview function
  * @private
  */
 async function _updateCodePreviewInternal(): Promise<void> {
 	try {
 		const timestamp = new Date().toISOString().slice(0, 19);
+		const formValues = collectFormValuesWithPlaceholders();
+		const fingerprint = await generateFingerprintSafely(formValues, timestamp);
 
-		// Get values or use placeholders for empty fields
-		let merchantUniquePaymentId = DomUtils.getValue('#merchantUniquePaymentIdInput');
-		if (!merchantUniquePaymentId) {
-			const input = document.getElementById('merchantUniquePaymentIdInput') as HTMLInputElement;
-			merchantUniquePaymentId = input?.placeholder || crypto.randomUUID();
-		}
-
-		const apiKey = DomUtils.getValue('#apiKeyInput') || DEFAULT_VALUES.credentials.apiKey;
-		const username = DomUtils.getValue('#usernameInput') || DEFAULT_VALUES.credentials.username;
-		const password = DomUtils.getValue('#passwordInput') || DEFAULT_VALUES.credentials.password;
-
-		let paymentAmountStr = DomUtils.getValue('#paymentAmountInput');
-		if (!paymentAmountStr) {
-			const input = document.getElementById('paymentAmountInput') as HTMLInputElement;
-			paymentAmountStr = input?.placeholder || generateRandomPaymentAmount(10.0, 1000.0);
-		}
-		const paymentAmount = parseFloat(paymentAmountStr);
-
-		const mode = DomUtils.getValue('#modeSelect');
-
-		let fingerprint = '';
-
-		try {
-			if (apiKey && username && password && paymentAmount && mode && timestamp && merchantUniquePaymentId) {
-				fingerprint = await generateFingerprint(
-					apiKey,
-					username,
-					password,
-					mode,
-					paymentAmount.toString(),
-					merchantUniquePaymentId,
-					timestamp
-				);
-			}
-		} catch (error) {
-			console.warn('[updateCodePreview] Could not generate fingerprint:', error);
-		}
-
-		// Normalize payment amount for API (remove decimal point)
-		const normalizedPaymentAmount = mode === '2' ? 0 : Math.floor(paymentAmount * 100);
+		const normalizedPaymentAmount = formValues.mode === '2' ? 0 : Math.floor(formValues.paymentAmount * 100);
 
 		const snippet = buildCodeSnippet({
-			apiKey,
+			apiKey: formValues.apiKey,
 			paymentAmount: normalizedPaymentAmount,
-			mode,
+			mode: formValues.mode,
 			timestamp,
-			merchantUniquePaymentId,
+			merchantUniquePaymentId: formValues.merchantUniquePaymentId,
 			fingerprint,
 		});
 
-		const codePreviewEl = document.getElementById('codePreview');
-		if (codePreviewEl) {
-			codePreviewEl.textContent = snippet;
-			delete (codePreviewEl as any).dataset.highlighted;
-			hljs.highlightElement(codePreviewEl);
-		}
+		updateCodePreviewDisplay(snippet);
 	} catch (error) {
 		console.error('[_updateCodePreviewInternal] Error updating code preview:', error);
 		throw new CodePreviewError(
@@ -351,6 +499,63 @@ export function updateMinHeightBasedOnMode(): void {
 }
 
 /**
+ * Extracts configuration text from code preview
+ * @param codePreviewText - Full code preview text
+ * @returns Extracted configuration text
+ * @throws {Error} If extraction fails
+ */
+function extractConfigurationText(codePreviewText: string): string {
+	if (!codePreviewText) {
+		throw new Error('Code preview is empty');
+	}
+
+	const configMatch = codePreviewText.match(/\$\.zpPayment\(\{\s*([\s\S]*?)\s*\}\)/);
+
+	if (!configMatch || !configMatch[1]) {
+		throw new Error('Could not extract configuration from code preview');
+	}
+
+	return configMatch[1];
+}
+
+/**
+ * Parses a single configuration line into key-value pair
+ * @param line - Configuration line to parse
+ * @param config - Config object to update
+ */
+function parseConfigurationLine(line: string, config: ParsedCodeConfig): void {
+	const match = line.trim().match(/^([^:]+):\s*(.+)$/);
+	if (!match) return;
+
+	let [, key, value] = match;
+	key = key?.trim() || '';
+	value = value?.trim() || '';
+
+	if (value.startsWith('"') && value.endsWith('"')) {
+		config[key] = value.substring(1, value.length - 1);
+	} else if (value === 'true') {
+		config[key] = true;
+	} else if (value === 'false') {
+		config[key] = false;
+	} else if (!isNaN(Number(value))) {
+		config[key] = Number(value);
+	} else {
+		config[key] = value;
+	}
+}
+
+/**
+ * Normalizes configuration field names (handles timestamp conversion)
+ * @param config - Configuration to normalize
+ */
+function normalizeConfigurationFields(config: ParsedCodeConfig): void {
+	if (config.timeStamp) {
+		config.timestamp = config.timeStamp as string;
+		delete config.timeStamp;
+	}
+}
+
+/**
  * Parses configuration object from displayed code preview
  * @returns Parsed configuration object
  * @throws {CodePreviewError} If parsing fails
@@ -358,47 +563,12 @@ export function updateMinHeightBasedOnMode(): void {
 export function parseCodePreviewConfig(): ParsedCodeConfig {
 	try {
 		const codePreviewText = DomUtils.getText('#codePreview');
-
-		if (!codePreviewText) {
-			throw new Error('Code preview is empty');
-		}
-
-		const configMatch = codePreviewText.match(/\$\.zpPayment\(\{\s*([\s\S]*?)\s*\}\)/);
-
-		if (!configMatch || !configMatch[1]) {
-			throw new Error('Could not extract configuration from code preview');
-		}
-
-		const configText = configMatch[1];
+		const configText = extractConfigurationText(codePreviewText);
 		const configLines = configText.split(',\n');
 		const parsedConfig: ParsedCodeConfig = {};
 
-		configLines.forEach(line => {
-			const match = line.trim().match(/^([^:]+):\s*(.+)$/);
-			if (!match) return;
-
-			let [, key, value] = match;
-			key = key?.trim() || '';
-			value = value?.trim() || '';
-
-			if (value.startsWith('"') && value.endsWith('"')) {
-				parsedConfig[key] = value.substring(1, value.length - 1);
-			} else if (value === 'true') {
-				parsedConfig[key] = true;
-			} else if (value === 'false') {
-				parsedConfig[key] = false;
-			} else if (!isNaN(Number(value))) {
-				parsedConfig[key] = Number(value);
-			} else {
-				parsedConfig[key] = value;
-			}
-		});
-
-		// Handle timestamp field name conversion
-		if (parsedConfig.timeStamp) {
-			parsedConfig.timestamp = parsedConfig.timeStamp as string;
-			delete parsedConfig.timeStamp;
-		}
+		configLines.forEach(line => parseConfigurationLine(line, parsedConfig));
+		normalizeConfigurationFields(parsedConfig);
 
 		console.debug('[parseCodePreviewConfig] Parsed config:', parsedConfig);
 		return parsedConfig;

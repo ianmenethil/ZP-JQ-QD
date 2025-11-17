@@ -4,15 +4,7 @@
  */
 
 import { sha3_512 } from '../globals.ts';
-// export interface FingerprintPayload {
-// 	readonly apiKey: string;
-// 	readonly username: string;
-// 	readonly password: string;
-// 	readonly mode: string;
-// 	readonly paymentAmount: string;
-// 	readonly merchantUniquePaymentId: string;
-// 	readonly timestamp: string;
-// }
+
 // =============================
 // Types
 // =============================
@@ -36,12 +28,6 @@ export interface ProcessedCredentials {
 	readonly username: string;
 	readonly password: string;
 }
-
-// export interface HashGenerationOptions {
-// 	readonly algorithm: HashAlgorithm;
-// 	readonly includeTimestamp?: boolean;
-// 	readonly useV3CompatMode?: boolean;
-// }
 
 export class FingerprintValidationError extends Error {
 	constructor(
@@ -80,44 +66,9 @@ const HASH_ALGORITHM_CONFIG: Record<ZenPayApiVersion, HashAlgorithm> = {
 	v5: 'SHA-3-512',
 } as const;
 
-// const TS_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/;
-
 // =============================
 // Small helpers
 // =============================
-// function isIsoTimestamp(ts: string): boolean {
-// 	return TS_REGEX.test(ts);
-// }
-
-// function requireNonEmpty(value: string, field: keyof PaymentFingerprintPayload): void {
-// 	if (typeof value !== 'string' || value.trim() === '') {
-// 		throw new FingerprintValidationError(
-// 			`${String(field)} is required and must be a non-empty string`,
-// 			field,
-// 			value
-// 		);
-// 	}
-// }
-
-// Unused - detected by find-usage script as dead code
-// function requirePositiveAmount(amount: string): void {
-// 	const n = Number(amount);
-// 	if (!Number.isFinite(n) || n <= 0) {
-// 		throw new FingerprintValidationError(
-// 			'paymentAmount is required and must be a positive number',
-// 			'paymentAmount',
-// 			amount
-// 		);
-// 	}
-// 	if (!Number.isInteger(n)) {
-// 		throw new FingerprintValidationError(
-// 			'paymentAmount must be a whole number (no decimals)',
-// 			'paymentAmount',
-// 			amount
-// 		);
-// 	}
-// }
-
 function hexFromBuffer(buf: ArrayBuffer): string {
 	return Array.from(new Uint8Array(buf))
 		.map((b) => b.toString(16).padStart(2, '0'))
@@ -140,28 +91,6 @@ function removePlaceholderCredentials(c: {
 		password: c.password === PLACEHOLDER_CREDENTIALS.PASSWORD ? '' : c.password,
 	};
 }
-
-// =============================
-// Validation
-// =============================
-/*
-function validatePaymentFingerprintPayload(p: PaymentFingerprintPayload): void {
-	requireNonEmpty(p.apiKey, 'apiKey');
-	requireNonEmpty(p.username, 'username');
-	requireNonEmpty(p.password, 'password');
-	requireNonEmpty(p.mode, 'mode');
-	requirePositiveAmount(p.paymentAmount);
-	requireNonEmpty(p.merchantUniquePaymentId, 'merchantUniquePaymentId');
-	requireNonEmpty(p.timestamp, 'timestamp');
-	if (!isIsoTimestamp(p.timestamp)) {
-		throw new FingerprintValidationError(
-			'timestamp must be in format yyyy-mm-ddThh:mm:ss',
-			'timestamp',
-			p.timestamp
-		);
-	}
-}
-*/
 
 // =============================
 // Hash primitives
@@ -191,36 +120,6 @@ function sha3Hash(input: string): string {
 		);
 	}
 }
-
-// =============================
-// Public builders
-// =============================
-// export function buildValidatedPaymentFingerprintPayload(
-// 	apiKey: string,
-// 	username: string,
-// 	password: string,
-// 	mode: PaymentMode,
-// 	paymentAmount: string,
-// 	merchantUniquePaymentId: string,
-// 	timestamp: string
-// ): PaymentFingerprintPayload {
-// 	const payload: PaymentFingerprintPayload = {
-// 		apiKey,
-// 		username,
-// 		password,
-// 		mode,
-// 		paymentAmount,
-// 		merchantUniquePaymentId,
-// 		timestamp,
-// 	};
-// 	try {
-// 		validatePaymentFingerprintPayload(payload);
-// 		return payload;
-// 	} catch (err) {
-// 		if (err instanceof FingerprintValidationError) showError('Validation Error', err.message);
-// 		throw err;
-// 	}
-// }
 
 // =============================
 // Specific fingerprint creators
@@ -341,18 +240,3 @@ export async function generatePaymentSecurityFingerprint(
 // =============================
 // Utilities
 // =============================
-// export function isCryptographicFingerprint(value: unknown): value is CryptographicFingerprint {
-// 	return typeof value === 'string' && value.length > 0 && /^[a-f0-9]+$/i.test(value);
-// }
-
-// export function getHashAlgorithmForVersion(version: ZenPayApiVersion): HashAlgorithm {
-// 	return HASH_ALGORITHM_CONFIG[version];
-// }
-
-// export function getSupportedApiVersions(): ZenPayApiVersion[] {
-// 	return Object.keys(HASH_ALGORITHM_CONFIG) as ZenPayApiVersion[];
-// }
-
-// export function isSupportedApiVersion(version: string): version is ZenPayApiVersion {
-// 	return version in HASH_ALGORITHM_CONFIG;
-// }

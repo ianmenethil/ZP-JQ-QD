@@ -377,6 +377,69 @@ async function handleFileSelection(
 // ============================================================================
 
 /**
+ * Creates file change handler for file input element
+ * @param config - File input configuration
+ * @returns Async event handler function
+ */
+function createFileChangeHandler(config: FileInputConfig): (event: Event) => Promise<void> {
+	return async (event: Event): Promise<void> => {
+		const target = event.target as HTMLInputElement;
+		const files = target.files;
+
+		if (!files || files.length === 0) {
+			console.log('[FileInput] No file selected');
+			return;
+		}
+
+		const file = files[0];
+		if (file) {
+			console.log(`[FileInput] Processing file: ${file.name} (${(file.size / 1024).toFixed(2)}KB)`);
+			await handleFileSelection(file, config);
+
+			if (target.id === 'fileInputConfig') {
+				target.value = '';
+				console.log('[FileInput] File input reset, ready for next import');
+			}
+		}
+	};
+}
+
+/**
+ * Attaches listener to hidden file input element
+ * @param config - File input configuration
+ */
+function attachHiddenFileInputListener(config: FileInputConfig): void {
+	const fileInputConfig = document.getElementById('fileInputConfig') as HTMLInputElement;
+	if (fileInputConfig) {
+		fileInputConfig.addEventListener('change', createFileChangeHandler(config));
+	}
+}
+
+/**
+ * Attaches listener to browse button for backward compatibility
+ * @param config - File input configuration
+ */
+function attachBrowseButtonListener(config: FileInputConfig): void {
+	const browseConfigBtn = document.getElementById('browseConfigBtn');
+	if (!browseConfigBtn) return;
+
+	browseConfigBtn.addEventListener('click', () => {
+		try {
+			const fileInput = document.createElement('input');
+			fileInput.type = 'file';
+			fileInput.accept = config.accept || DEFAULT_FILE_CONFIG.accept;
+			fileInput.multiple = config.multiple || false;
+
+			fileInput.addEventListener('change', createFileChangeHandler(config));
+			fileInput.click();
+		} catch (error) {
+			console.error('[attachBrowseButtonListener] Error creating file input:', error);
+			showError('File Input Error', 'Failed to create file input dialog');
+		}
+	});
+}
+
+/**
  * Initialize file input listener on the "Browse Configuration" button
  * Opens a file picker for JSON files, validates the loaded configuration,
  * populates corresponding input fields, saves session values, and updates the code preview
@@ -396,60 +459,8 @@ async function handleFileSelection(
  */
 export function initFileInputListener(config: FileInputConfig = DEFAULT_FILE_CONFIG): void {
 	try {
-		// Attach to hidden file input (triggered by keyboard shortcut Ctrl+Alt+Shift+U)
-		const fileInputConfig = document.getElementById('fileInputConfig') as HTMLInputElement;
-		if (fileInputConfig) {
-			fileInputConfig.addEventListener('change', async (event) => {
-				const target = event.target as HTMLInputElement;
-				const files = target.files;
-
-				if (!files || files.length === 0) {
-					console.log('[FileInput] No file selected');
-					return;
-				}
-
-				const file = files[0];
-				if (file) {
-					console.log(`[FileInput] 📄 Processing file: ${file.name} (${(file.size / 1024).toFixed(2)}KB)`);
-					await handleFileSelection(file, config);
-					// Reset file input so the same file can be selected again
-					fileInputConfig.value = '';
-					console.log('[FileInput] ✅ File input reset, ready for next import');
-				}
-			});
-		}
-
-		// Also support old browseConfigBtn if it exists (backward compatibility)
-		const browseConfigBtn = document.getElementById('browseConfigBtn');
-		if (browseConfigBtn) {
-			browseConfigBtn.addEventListener('click', () => {
-				try {
-					const fileInput = document.createElement('input');
-					fileInput.type = 'file';
-					fileInput.accept = config.accept || DEFAULT_FILE_CONFIG.accept;
-					fileInput.multiple = config.multiple || false;
-
-					fileInput.addEventListener('change', async (event) => {
-						const target = event.target as HTMLInputElement;
-						const files = target.files;
-
-						if (!files || files.length === 0) {
-							return;
-						}
-
-						const file = files[0];
-						if (file) {
-							await handleFileSelection(file, config);
-						}
-					});
-
-					fileInput.click();
-				} catch (error) {
-					console.error('[initFileInputListener] Error creating file input:', error);
-					showError('File Input Error', 'Failed to create file input dialog');
-				}
-			});
-		}
+		attachHiddenFileInputListener(config);
+		attachBrowseButtonListener(config);
 
 		console.log('[initFileInputListener] File input listener initialized successfully');
 	} catch (error) {

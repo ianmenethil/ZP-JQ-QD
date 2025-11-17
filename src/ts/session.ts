@@ -17,6 +17,7 @@ import {
 	obfuscateCredential,
 	safeParse,
 	safeStringify,
+	type Base64EncodedString,
 } from './utilities.ts';
 
 // ============================================================================
@@ -153,7 +154,7 @@ export function loadCredentials(): Credentials | null {
 	if (!encoded) return null;
 
 	try {
-		const json = decodeBase64TextToAscii(encoded as any);
+		const json = decodeBase64TextToAscii(encoded as Base64EncodedString);
 		return safeParse<Credentials>(json);
 	} catch (error) {
 		console.error('[loadCredentials] Failed to decode credentials:', error);
@@ -235,7 +236,7 @@ export function loadState(): PaymentState | null {
 	if (!encoded) return null;
 
 	try {
-		const json = decodeBase64TextToAscii(encoded as any);
+		const json = decodeBase64TextToAscii(encoded as Base64EncodedString);
 		return safeParse<PaymentState>(json);
 	} catch (error) {
 		console.error('[loadState] Failed to decode state:', error);
@@ -246,11 +247,6 @@ export function loadState(): PaymentState | null {
 /**
  * Clear all ZenPay session storage
  */
-/* function clearSession(): void {
-    if (!store) return;
-    store.removeItem(KEYS.CREDENTIALS);
-    store.removeItem(KEYS.STATE);
-} */
 
 // ============================================================================
 // LEGACY STORAGE HELPERS (for theme, URL builder, etc.)
@@ -281,7 +277,7 @@ export function getFromStorage<T = unknown>(
 
 	try {
 		// Decode base64 first
-		const decoded = decodeBase64TextToAscii(encoded as any);
+		const decoded = decodeBase64TextToAscii(encoded as Base64EncodedString);
 		const parsed = safeParse<T>(decoded);
 
 		if (parsed !== null) return parsed;
@@ -310,21 +306,6 @@ export function saveToStorage(key: string, value: unknown, type: StorageType = S
 }
 
 /**
- * Save to session storage (automatically base64 encoded)
- */
-/* function saveToSession(key: string, value: unknown): void {
-    if (!store) return;
-
-    try {
-        const raw = typeof value === 'string' ? value : safeStringify(value);
-        const encoded = encodeAsciiTextToBase64(raw);
-        store.setItem(key, encoded);
-    } catch (error) {
-        console.error(`[saveToSession] Failed to encode base64 for key "${key}":`, error);
-    }
-} */
-
-/**
  * Get from session storage with fallback (automatically base64 decoded)
  */
 export function getFromSession<T = unknown>(key: string): T | null;
@@ -337,7 +318,7 @@ export function getFromSession<T>(key: string, fallback?: T): T | null {
 
 	try {
 		// Decode base64 first
-		const decoded = decodeBase64TextToAscii(encoded as any);
+		const decoded = decodeBase64TextToAscii(encoded as Base64EncodedString);
 		const parsed = safeParse<T>(decoded);
 
 		if (parsed !== null) return parsed;

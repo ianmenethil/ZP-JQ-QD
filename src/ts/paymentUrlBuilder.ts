@@ -116,7 +116,7 @@ export function updateRedirectUrlInForm(): void {
 		}
 
 		// Update extended options
-		(extendedOptions as any).redirectUrl = redirectUrl;
+		(extendedOptions as unknown as Record<string, string | number>)['redirectUrl'] = redirectUrl;
 
 		// Update code preview if available
 		if (typeof updateCodePreview === 'function') {
@@ -294,6 +294,69 @@ async function copyUrlFromModalToClipboard(): Promise<void> {
 // ============================================================================
 
 /**
+ * Attaches listeners to subdomain radio buttons
+ */
+function attachSubdomainListeners(): void {
+	const subdomainInputs = document.querySelectorAll('input[name="subdomain"]');
+	subdomainInputs.forEach(input => {
+		input.addEventListener('change', updatePaymentUrlPreviewDisplay);
+	});
+}
+
+/**
+ * Attaches listeners to domain select and version radio buttons
+ */
+function attachDomainAndVersionListeners(): void {
+	const domainSelect = document.getElementById('domainSelect');
+	if (domainSelect) {
+		domainSelect.addEventListener('change', updatePaymentUrlPreviewDisplay);
+	}
+
+	const versionInputs = document.querySelectorAll('input[name="version"]');
+	versionInputs.forEach(input => {
+		input.addEventListener('change', updatePaymentUrlPreviewDisplay);
+	});
+}
+
+/**
+ * Attaches listeners to modal action buttons (copy and apply)
+ * @param modal - Bootstrap modal instance
+ */
+function attachModalActionListeners(modal: bootstrap.Modal): void {
+	const modalCopyButton = document.getElementById('modalCopyUrlBtn');
+	if (modalCopyButton) {
+		modalCopyButton.addEventListener('click', copyUrlFromModalToClipboard);
+	}
+
+	const applyUrlChangesButton = document.getElementById('applyUrlChanges');
+	if (applyUrlChangesButton) {
+		applyUrlChangesButton.addEventListener('click', () => {
+			console.log('[attachModalActionListeners] Applying URL changes from modal');
+			updatePaymentUrlPreviewDisplay();
+			modal.hide();
+		});
+	}
+}
+
+/**
+ * Attaches listener to URL Builder button to open modal
+ * @param modal - Bootstrap modal instance
+ */
+function attachUrlBuilderButtonListener(modal: bootstrap.Modal): void {
+	const urlBuilderBtn = document.getElementById('urlBuilderBtn');
+
+	if (urlBuilderBtn) {
+		urlBuilderBtn.addEventListener('click', () => {
+			console.log('[attachUrlBuilderButtonListener] URL Builder button clicked, showing modal');
+			modal.show();
+		});
+		console.log('[attachUrlBuilderButtonListener] Click listener attached to URL Builder button');
+	} else {
+		console.warn('[attachUrlBuilderButtonListener] urlBuilderBtn not found, modal can only open programmatically');
+	}
+}
+
+/**
  * Set up event listeners for URL builder form elements
  * Follows same pattern as errorCodes.ts - create modal instance once, reuse it
  */
@@ -301,68 +364,22 @@ function setupUrlBuilderEventListeners(): void {
 	const doc = globalThis.document;
 	if (!doc) return;
 
-	// Get modal element and button
 	const modalEl = doc.getElementById('urlBuilderModal');
-	const urlBuilderBtn = doc.getElementById('urlBuilderBtn');
 
 	console.log('[setupUrlBuilderEventListeners] Modal element found:', !!modalEl);
-	console.log('[setupUrlBuilderEventListeners] Button found:', !!urlBuilderBtn);
 
 	if (!modalEl) {
 		console.error('[setupUrlBuilderEventListeners] urlBuilderModal element not found in DOM');
 		return;
 	}
 
-	// Create modal instance once (same pattern as errorCodes)
-	const modal = new (window as any).bootstrap.Modal(modalEl);
+	const modal = new window.bootstrap.Modal(modalEl);
 	console.log('[setupUrlBuilderEventListeners] Bootstrap Modal instance created');
 
-	// Subdomain radio buttons
-	const subdomainInputs = doc.querySelectorAll('input[name="subdomain"]');
-	subdomainInputs.forEach((input) => {
-		input.addEventListener('change', updatePaymentUrlPreviewDisplay);
-	});
-
-	// Domain select dropdown
-	const domainSelect = doc.getElementById('domainSelect');
-	if (domainSelect) {
-		domainSelect.addEventListener('change', updatePaymentUrlPreviewDisplay);
-	}
-
-	// Version radio buttons
-	const versionInputs = doc.querySelectorAll('input[name="version"]');
-	versionInputs.forEach((input) => {
-		input.addEventListener('change', updatePaymentUrlPreviewDisplay);
-	});
-
-	// Modal copy button
-	const modalCopyButton = doc.getElementById('modalCopyUrlBtn');
-	if (modalCopyButton) {
-		modalCopyButton.addEventListener('click', copyUrlFromModalToClipboard);
-	}
-
-	// Apply URL changes button
-	const applyUrlChangesButton = doc.getElementById('applyUrlChanges');
-	if (applyUrlChangesButton) {
-		applyUrlChangesButton.addEventListener('click', () => {
-			console.log('[setupUrlBuilderEventListeners] Applying URL changes from modal');
-			updatePaymentUrlPreviewDisplay();
-			modal.hide();
-		});
-	}
-
-	// URL Builder button - open modal (same pattern as errorCodes)
-	if (urlBuilderBtn) {
-		urlBuilderBtn.addEventListener('click', () => {
-			console.log('[setupUrlBuilderEventListeners] URL Builder button clicked, showing modal');
-			modal.show();
-		});
-		console.log('[setupUrlBuilderEventListeners] Click listener attached to URL Builder button');
-	} else {
-		console.warn(
-			'[setupUrlBuilderEventListeners] urlBuilderBtn not found, modal can only open programmatically'
-		);
-	}
+	attachSubdomainListeners();
+	attachDomainAndVersionListeners();
+	attachModalActionListeners(modal);
+	attachUrlBuilderButtonListener(modal);
 }
 
 /**

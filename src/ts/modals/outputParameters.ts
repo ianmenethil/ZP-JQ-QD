@@ -173,28 +173,12 @@ export async function initOutputParametersModal(): Promise<void> {
 	}
 
 	// Make rerender globally available for info icon functions
-	(window as any).outputParametersRerender = rerender;
-	(window as any).outputParametersModal = modal;
-	(window as any).outputParametersSearchInput = searchInput;
+	window.outputParametersRerender = rerender;
+	window.outputParametersModal = modal;
+	if (searchInput) {
+		window.outputParametersSearchInput = searchInput;
+	}
 
 	const parameters = await getOutputParameters();
 	console.log('[outputParameters] Modal initialized with', parameters.length, 'parameters');
 }
-
-/**
- * Show output parameters modal with pre-filtered search
- */
-// export function showOutputParameterModal(searchTerm: string): void {
-// 	const modal = (window as any).outputParametersModal;
-// 	const searchInput = (window as any).outputParametersSearchInput;
-// 	const rerender = (window as any).outputParametersRerender;
-
-// 	if (!modal || !searchInput || !rerender) {
-// 		console.warn('[outputParameters] Modal not initialized');
-// 		return;
-// 	}
-
-// 	searchInput.value = searchTerm;
-// 	rerender();
-// 	modal.show();
-// }

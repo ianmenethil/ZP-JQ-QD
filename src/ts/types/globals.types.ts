@@ -96,12 +96,94 @@ interface V3CompatibilityMode {
 export type Sha3HashFunction = (data: string) => string;
 type HelpFunction = () => void;
 
+// Bootstrap types
+export interface BootstrapModal {
+	show(): void;
+	hide(): void;
+	toggle(): void;
+	dispose(): void;
+	handleUpdate(): void;
+}
+
+export interface BootstrapModalConstructor {
+	new (element: HTMLElement, options?: Record<string, unknown>): BootstrapModal;
+	getInstance(element: HTMLElement): BootstrapModal | null;
+	getOrCreateInstance(element: HTMLElement, options?: Record<string, unknown>): BootstrapModal;
+}
+
+export interface BootstrapTooltip {
+	show(): void;
+	hide(): void;
+	toggle(): void;
+	dispose(): void;
+	enable(): void;
+	disable(): void;
+	toggleEnabled(): void;
+	update(): void;
+}
+
+export interface BootstrapTooltipConstructor {
+	new (element: HTMLElement, options?: Record<string, unknown>): BootstrapTooltip;
+	getInstance(element: HTMLElement): BootstrapTooltip | null;
+	getOrCreateInstance(element: HTMLElement, options?: Record<string, unknown>): BootstrapTooltip;
+}
+
+export interface BootstrapNamespace {
+	Modal: BootstrapModalConstructor;
+	Tooltip: BootstrapTooltipConstructor;
+}
+
+// Highlight.js types
+export interface HljsHighlightResult {
+	language?: string;
+	relevance: number;
+	value: string;
+	second_best?: {
+		language?: string;
+		relevance: number;
+		value: string;
+	};
+}
+
+export interface HljsNamespace {
+	highlight(code: string, options: { language: string }): HljsHighlightResult;
+	highlightAuto(code: string, languageSubset?: string[]): HljsHighlightResult;
+	highlightElement(element: HTMLElement): void;
+	configure(options: Record<string, unknown>): void;
+	initHighlighting(): void;
+	initHighlightingOnLoad(): void;
+	registerLanguage(name: string, language: unknown): void;
+	listLanguages(): string[];
+	getLanguage(name: string): unknown;
+	autoDetection(name: string): boolean;
+}
+
+// Window extensions for modal state management
+export interface ModalStateExtension {
+	errorCodesRerender?: () => Promise<void>;
+	errorCodesModal?: BootstrapModal;
+	errorCodesSearchInput?: HTMLInputElement;
+	inputParametersRerender?: () => Promise<void>;
+	inputParametersModal?: BootstrapModal;
+	inputParametersSearchInput?: HTMLInputElement;
+	outputParametersRerender?: () => Promise<void>;
+	outputParametersModal?: BootstrapModal;
+	outputParametersSearchInput?: HTMLInputElement;
+	showParameterModal?: (searchTerm: string) => void;
+}
+
 declare global {
-	interface Window {
-		bootstrap: any;
-		hljs: any;
+	interface Window extends ModalStateExtension {
+		bootstrap: BootstrapNamespace;
+		hljs: HljsNamespace;
 		sha3_512?: Sha3HashFunction;
 		zpV3CompatMode: V3CompatibilityMode;
 		zenhelp: HelpFunction;
+	}
+
+	// Element extensions for storing event handlers
+	interface HTMLElement {
+		_extendedOptionsHandler?: EventListener;
+		_extendedOptionsDomainHandler?: EventListener;
 	}
 }

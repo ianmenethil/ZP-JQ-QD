@@ -59,8 +59,9 @@ function parseThemeFromStorage(rawData: unknown): ThemeType | null {
 		} catch {
 			return null;
 		}
-	} else if (rawData && typeof rawData === 'object' && 'theme' in (rawData as any)) {
-		const t = (rawData as any).theme;
+	} else if (rawData && typeof rawData === 'object' && 'theme' in rawData) {
+		const obj = rawData as Record<string, unknown>;
+		const t = obj['theme'];
 		if (t === 'light' || t === 'dark') return t;
 	}
 	return null;
