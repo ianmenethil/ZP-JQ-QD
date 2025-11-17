@@ -80,6 +80,235 @@ function getRadioValue(name: string): number {
 }
 
 /**
+ * Gets input value or its placeholder if empty
+ * @param inputId - Input element ID
+ * @param fallbackGenerator - Optional function to generate fallback value
+ * @returns Input value, placeholder, or generated fallback
+ */
+function getInputValueOrPlaceholder(inputId: string, fallbackGenerator?: () => string): string {
+	const value = DomUtils.getValue(`#${inputId}`);
+	if (value) {
+		return value;
+	}
+
+	const input = document.getElementById(inputId) as HTMLInputElement;
+	return input?.placeholder || (fallbackGenerator ? fallbackGenerator() : '');
+}
+
+/**
+ * Collects customer-related field values
+ * @returns Object containing customer details
+ */
+function collectCustomerDetails(): {
+	customerReference: string;
+	customerName: string;
+	customerEmail: string;
+	contactNumber: string;
+	additionalReference: string;
+} {
+	const customerReference = getInputValueOrPlaceholder('customerReferenceInput', () => crypto.randomUUID());
+
+	let customerName = getInputValueOrPlaceholder('customerNameInput');
+	let customerEmail = DomUtils.getValue('#customerEmailInput');
+
+	if (!customerName) {
+		const input = document.getElementById('customerNameInput') as HTMLInputElement;
+		customerName = input?.placeholder || '';
+		if (!customerEmail) {
+			const emailInput = document.getElementById('customerEmailInput') as HTMLInputElement;
+			customerEmail = emailInput?.placeholder || '';
+		}
+	}
+
+	const contactNumber = getInputValueOrPlaceholder('contactNumberInput', generateRandomContactNumber);
+	const additionalReference = getInputValueOrPlaceholder('additionalReferenceInput', () => crypto.randomUUID());
+
+	return { customerReference, customerName, customerEmail, contactNumber, additionalReference };
+}
+
+/**
+ * Collects URL configuration values
+ * @returns Object containing redirect and callback URLs
+ */
+function collectUrls(): { redirectUrl: string; callbackUrl: string } {
+	return {
+		redirectUrl: DomUtils.getValue('#redirectUrlInput') || DEFAULT_VALUES.extended.redirectUrl,
+		callbackUrl: DomUtils.getValue('#callbackUrlInput'),
+	};
+}
+
+/**
+ * Builds array of required properties for code snippet
+ * @param config - Code snippet configuration
+ * @param merchantCode - Merchant code value
+ * @param url - Gateway URL
+ * @param customerReference - Customer reference value
+ * @returns Array of property strings
+ */
+function buildRequiredProperties(
+	config: CodeSnippetConfig,
+	merchantCode: string,
+	url: string,
+	customerReference: string,
+	redirectUrl: string
+): string[] {
+	const { apiKey, paymentAmount, mode, timestamp, merchantUniquePaymentId, fingerprint } = config;
+
+	return [
+		`timeStamp: "${timestamp}"`,
+		`url: "${url}"`,
+		`merchantCode: "${merchantCode}"`,
+		`apiKey: "${apiKey}"`,
+		`fingerprint: "${fingerprint}"`,
+		`paymentAmount: ${paymentAmount}`,
+		`merchantUniquePaymentId: "${merchantUniquePaymentId}"`,
+		`mode: ${mode}`,
+		`redirectUrl: "${redirectUrl}"`,
+		...(customerReference ? [`customerReference: "${customerReference}"`] : []),
+	];
+}
+
+/**
+ * Adds optional customer-related fields to properties array
+ * @param properties - Properties array to modify
+ * @param customerName - Customer name value
+ * @param customerEmail - Customer email value
+ * @param callbackUrl - Callback URL value
+ * @param additionalReference - Additional reference value
+ * @param contactNumber - Contact number value
+ */
+function addOptionalCustomerFields(
+	properties: string[],
+	customerName: string,
+	customerEmail: string,
+	callbackUrl: string,
+	additionalReference: string,
+	contactNumber: string
+): void {
+	if (customerName) properties.push(`customerName: "${customerName}"`);
+	if (customerEmail) properties.push(`customerEmail: "${customerEmail}"`);
+	if (callbackUrl) properties.push(`callbackUrl: "${callbackUrl}"`);
+	if (additionalReference) properties.push(`additionalReference: "${additionalReference}"`);
+	if (contactNumber) properties.push(`contactNumber: ${contactNumber}`);
+}
+
+/**
+ * Adds payment method options to properties array
+ * @param properties - Properties array to modify
+ */
+function addPaymentMethodOptions(properties: string[]): void {
+	const paymentMethods = [
+		'allowBankAcOneOffPayment',
+		'allowPayToOneOffPayment',
+		'allowPayIdOneOffPayment',
+		'allowApplePayOneOffPayment',
+		'allowGooglePayOneOffPayment',
+		'allowSlicePayOneOffPayment',
+		'allowSaveCardUserOption',
+		'allowUnionPayOneOffPayment',
+	];
+
+	paymentMethods.forEach(method => {
+		if (getCheckboxState(`#${method}`)) {
+			properties.push(`${method}: true`);
+		}
+	});
+}
+
+/**
+ * Adds additional options to properties array
+ * @param properties - Properties array to modify
+ */
+function addAdditionalOptions(properties: string[]): void {
+	const additionalOptions = [
+		'sendConfirmationEmailToCustomer',
+		'sendConfirmationEmailToMerchant',
+		'hideTermsAndConditions',
+		'hideMerchantLogo',
+	];
+
+	additionalOptions.forEach(option => {
+		if (getCheckboxState(`#${option}`)) {
+			properties.push(`${option}: true`);
+		}
+	});
+}
+
+/**
+ * Adds tokenization-specific options to properties array
+ * @param properties - Properties array to modify
+ * @param mode - Payment mode
+ */
+function addTokenizationOptions(properties: string[], mode: string): void {
+	if (mode === '1') {
+		if (getCheckboxState('#showFeeOnTokenising')) {
+			properties.push('showFeeOnTokenising: true');
+		}
+		if (getCheckboxState('#showFailedPaymentFeeOnTokenising')) {
+			properties.push('showFailedPaymentFeeOnTokenising: true');
+		}
+	}
+}
+
+/**
+ * Adds user interface options to properties array
+ * @param properties - Properties array to modify
+ */
+function addUserInterfaceOptions(properties: string[]): void {
+	const userMode = getRadioValue('userMode');
+	if (userMode !== 0) {
+		properties.push(`userMode: ${userMode}`);
+	}
+
+	const overrideFeePayer = getRadioValue('overrideFeePayer');
+	if (overrideFeePayer !== 0) {
+		properties.push(`overrideFeePayer: ${overrideFeePayer}`);
+	}
+
+	const displayMode = getRadioValue('displayMode');
+	if (displayMode !== 0) {
+		properties.push(`displayMode: ${displayMode}`);
+	}
+}
+
+/**
+ * Adds numeric configuration options to properties array
+ * @param properties - Properties array to modify
+ * @param mode - Payment mode
+ */
+function addNumericOptions(properties: string[], mode: string): void {
+	const minHeight = parseInt(DomUtils.getValue('#minHeightInput'), 10);
+	const defaultHeight = mode === '1' ? 600 : DEFAULT_VALUES.options.minHeight;
+	if (minHeight && minHeight !== defaultHeight) {
+		properties.push(`minHeight: ${minHeight}`);
+	}
+}
+
+/**
+ * Adds SlicePay-specific options to properties array
+ * @param properties - Properties array to modify
+ */
+function addSlicePayOptions(properties: string[]): void {
+	if (getCheckboxState('#allowSlicePayOneOffPayment')) {
+		const departureDate = DomUtils.getValue('#departureDateInput');
+		if (departureDate) {
+			properties.push(`departureDate: "${departureDate}"`);
+		}
+	}
+}
+
+/**
+ * Formats properties array into final code snippet
+ * @param properties - Array of property strings
+ * @returns Formatted JavaScript code snippet
+ */
+function formatCodeSnippet(properties: string[]): string {
+	let snippet = `var payment = $.zpPayment({\n    ${properties.join(',\n    ')}\n});`;
+	snippet += `\n\npayment.init();`;
+	return snippet.trim();
+}
+
+/**
  * Builds JavaScript code snippet for ZenPay plugin initialization
  * @param config - Code snippet configuration
  * @returns Formatted JavaScript code string
@@ -87,161 +316,37 @@ function getRadioValue(name: string): number {
  */
 function buildCodeSnippet(config: CodeSnippetConfig): string {
 	try {
-		const { apiKey, paymentAmount, mode, timestamp, merchantUniquePaymentId, fingerprint } = config;
-
 		const url = DomUtils.getValue('#urlPreview');
 		const merchantCode = DomUtils.getValue('#merchantCodeInput') || DEFAULT_VALUES.credentials.merchantCode;
 
-		// Get customer values or use placeholders
-		let customerReference = DomUtils.getValue('#customerReferenceInput');
-		if (!customerReference) {
-			const input = document.getElementById('customerReferenceInput') as HTMLInputElement;
-			customerReference = input?.placeholder || crypto.randomUUID();
-		}
+		const customerDetails = collectCustomerDetails();
+		const urls = collectUrls();
 
-		let customerName = DomUtils.getValue('#customerNameInput');
-		let customerEmail = DomUtils.getValue('#customerEmailInput');
-		if (!customerName) {
-			const input = document.getElementById('customerNameInput') as HTMLInputElement;
-			customerName = input?.placeholder || '';
-			// Only use placeholder for email if both are empty
-			if (!customerEmail) {
-				const emailInput = document.getElementById('customerEmailInput') as HTMLInputElement;
-				customerEmail = emailInput?.placeholder || '';
-			}
-		}
+		const properties = buildRequiredProperties(
+			config,
+			merchantCode,
+			url,
+			customerDetails.customerReference,
+			urls.redirectUrl
+		);
 
-		let contactNumber = DomUtils.getValue('#contactNumberInput');
-		if (!contactNumber) {
-			const input = document.getElementById('contactNumberInput') as HTMLInputElement;
-			contactNumber = input?.placeholder || generateRandomContactNumber();
-		}
+		addOptionalCustomerFields(
+			properties,
+			customerDetails.customerName,
+			customerDetails.customerEmail,
+			urls.callbackUrl,
+			customerDetails.additionalReference,
+			customerDetails.contactNumber
+		);
 
-		let additionalReference = DomUtils.getValue('#additionalReferenceInput');
-		if (!additionalReference) {
-			const input = document.getElementById('additionalReferenceInput') as HTMLInputElement;
-			additionalReference = input?.placeholder || crypto.randomUUID();
-		}
+		addPaymentMethodOptions(properties);
+		addAdditionalOptions(properties);
+		addTokenizationOptions(properties, config.mode);
+		addUserInterfaceOptions(properties);
+		addNumericOptions(properties, config.mode);
+		addSlicePayOptions(properties);
 
-		const redirectUrl = DomUtils.getValue('#redirectUrlInput') || DEFAULT_VALUES.extended.redirectUrl;
-		const callbackUrl = DomUtils.getValue('#callbackUrlInput');
-
-		// Start with required properties
-		const properties: string[] = [
-			`timeStamp: "${timestamp}"`,
-			`url: "${url}"`,
-			`merchantCode: "${merchantCode}"`,
-			`apiKey: "${apiKey}"`,
-			`fingerprint: "${fingerprint}"`,
-			`paymentAmount: ${paymentAmount}`,
-			`merchantUniquePaymentId: "${merchantUniquePaymentId}"`,
-			`mode: ${mode}`,
-			`redirectUrl: "${redirectUrl}"`,
-		];
-
-		if (customerReference) {
-			properties.push(`customerReference: "${customerReference}"`);
-		}
-
-		if (customerName) {
-			properties.push(`customerName: "${customerName}"`);
-		}
-
-		if (customerEmail) {
-			properties.push(`customerEmail: "${customerEmail}"`);
-		}
-
-		if (callbackUrl) {
-			properties.push(`callbackUrl: "${callbackUrl}"`);
-		}
-
-		if (additionalReference) {
-			properties.push(`additionalReference: "${additionalReference}"`);
-		}
-
-		// Add payment method options
-		const paymentMethods = [
-			'allowBankAcOneOffPayment',
-			'allowPayToOneOffPayment',
-			'allowPayIdOneOffPayment',
-			'allowApplePayOneOffPayment',
-			'allowGooglePayOneOffPayment',
-			'allowSlicePayOneOffPayment',
-			'allowSaveCardUserOption',
-			'allowUnionPayOneOffPayment',
-		];
-
-		paymentMethods.forEach(method => {
-			if (getCheckboxState(`#${method}`)) {
-				properties.push(`${method}: true`);
-			}
-		});
-
-		// Add additional options
-		const additionalOptions = [
-			'sendConfirmationEmailToCustomer',
-			'sendConfirmationEmailToMerchant',
-			'hideTermsAndConditions',
-			'hideMerchantLogo',
-		];
-
-		additionalOptions.forEach(option => {
-			if (getCheckboxState(`#${option}`)) {
-				properties.push(`${option}: true`);
-			}
-		});
-
-		// Add tokenization options for mode 1
-		if (mode === '1') {
-			if (getCheckboxState('#showFeeOnTokenising')) {
-				properties.push('showFeeOnTokenising: true');
-			}
-			if (getCheckboxState('#showFailedPaymentFeeOnTokenising')) {
-				properties.push('showFailedPaymentFeeOnTokenising: true');
-			}
-		}
-
-		// Add user mode and fee payer options
-		const userMode = getRadioValue('userMode');
-		if (userMode !== 0) {
-			properties.push(`userMode: ${userMode}`);
-		}
-
-		const overrideFeePayer = getRadioValue('overrideFeePayer');
-		if (overrideFeePayer !== 0) {
-			properties.push(`overrideFeePayer: ${overrideFeePayer}`);
-		}
-
-		// Add display mode
-		const displayMode = getRadioValue('displayMode');
-		if (displayMode !== 0) {
-			properties.push(`displayMode: ${displayMode}`);
-		}
-
-		// Add minHeight if different from default
-		const minHeight = parseInt(DomUtils.getValue('#minHeightInput'), 10);
-		const defaultHeight = mode === '1' ? 600 : DEFAULT_VALUES.options.minHeight;
-		if (minHeight && minHeight !== defaultHeight) {
-			properties.push(`minHeight: ${minHeight}`);
-		}
-
-		// Add contact number if provided
-		if (contactNumber) {
-			properties.push(`contactNumber: ${contactNumber}`);
-		}
-
-		// Add departure date if SlicePay is enabled
-		if (getCheckboxState('#allowSlicePayOneOffPayment')) {
-			const departureDate = DomUtils.getValue('#departureDateInput');
-			if (departureDate) {
-				properties.push(`departureDate: "${departureDate}"`);
-			}
-		}
-
-		let snippet = `var payment = $.zpPayment({\n    ${properties.join(',\n    ')}\n});`;
-		snippet += `\n\npayment.init();`;
-
-		return snippet.trim();
+		return formatCodeSnippet(properties);
 	} catch (error) {
 		throw new CodePreviewError(
 			'Failed to build code snippet',
