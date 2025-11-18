@@ -73,11 +73,18 @@ function handleBrowseConfigShortcut(event: KeyboardEvent): void {
 }
 
 /**
+ * Combined keyboard shortcut handler
+ */
+function handleKeyboardShortcuts(event: KeyboardEvent): void {
+	handleStorageClearShortcut(event);
+	handleBrowseConfigShortcut(event);
+}
+
+/**
  * Initialize keyboard shortcuts (lazy loading)
  */
 export function initKeyboardShortcuts(): void {
-	document.addEventListener('keydown', handleStorageClearShortcut);
-	document.addEventListener('keydown', handleBrowseConfigShortcut);
+	document.addEventListener('keydown', handleKeyboardShortcuts);
 	console.log('[KeyboardShortcuts] ⌨️  Initialized:');
 	console.log('  • Ctrl+Alt+Shift+C - Clear session and local storage');
 	console.log('  • Ctrl+Alt+Shift+U - Upload/Import JSON config file');

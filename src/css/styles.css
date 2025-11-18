@@ -686,9 +686,11 @@ textarea.form-control {
   overflow: hidden;
   transition: transform 0.15s ease;
   min-height: 60px !important;
+  max-height: 60px !important;
   padding: 0.5rem !important;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .payment-method-label {
@@ -706,6 +708,8 @@ textarea.form-control {
   cursor: pointer;
   transition: all 0.2s ease;
   height: 100%;
+  min-width: 0;
+  width: 100%;
 }
 
 .payment-method-name {
