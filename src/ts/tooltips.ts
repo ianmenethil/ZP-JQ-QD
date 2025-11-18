@@ -177,9 +177,16 @@ export function initTruncationTooltips(): void {
 			// Track tooltip instance on the element
 			let tooltipInstance: BootstrapTooltipInstance | null = null;
 			let isShowing = false;
+			let disposeTimeoutId: number | null = null;
 
 			// Add mouseenter listener to check for truncation
 			field.addEventListener('mouseenter', function (this: HTMLInputElement | HTMLTextAreaElement) {
+				// Clear any pending dispose timeout
+				if (disposeTimeoutId !== null) {
+					clearTimeout(disposeTimeoutId);
+					disposeTimeoutId = null;
+				}
+
 				// Only show tooltip if there's a value and it's truncated
 				if (this.value && isTextTruncated(this) && !isShowing) {
 					try {
@@ -213,19 +220,35 @@ export function initTruncationTooltips(): void {
 			field.addEventListener('mouseleave', function (this: HTMLInputElement | HTMLTextAreaElement) {
 				if (tooltipInstance && isShowing) {
 					try {
+						// Immediately reset showing flag to prevent race conditions
+						isShowing = false;
+
 						tooltipInstance.hide();
+
+						// Clean up attributes immediately
+						this.removeAttribute('data-bs-original-title');
+						this.removeAttribute('title');
+
 						// Dispose after a short delay to allow hide animation
-						setTimeout(() => {
+						disposeTimeoutId = window.setTimeout(() => {
 							if (tooltipInstance) {
 								tooltipInstance.dispose();
 								tooltipInstance = null;
 							}
-							isShowing = false;
-							this.removeAttribute('data-bs-original-title');
-							this.removeAttribute('title');
+							disposeTimeoutId = null;
 						}, 200);
 					} catch (error) {
 						console.warn('[initTruncationTooltips] Error hiding tooltip:', error);
+						// Ensure cleanup even if error occurs
+						isShowing = false;
+						if (tooltipInstance) {
+							try {
+								tooltipInstance.dispose();
+							} catch {
+								// Ignore disposal errors
+							}
+							tooltipInstance = null;
+						}
 					}
 				}
 			});
